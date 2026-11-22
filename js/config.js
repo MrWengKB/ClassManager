@@ -4,6 +4,6 @@
  *           (folder “Class Manager”). false = only in this browser.
  */
 window.CM_CONFIG = {
-  googleClientId: '260155776861-bd6q9qbpo6m7i1tm3218r522oa1odvla.apps.googleusercontent.com',
+  googleClientId: '420207963838-f58s3508rduj67h3uf35h44m9mf1nb12.apps.googleusercontent.com',
   useDrive: true
 };
