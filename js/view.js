@@ -52,24 +52,7 @@
     let h = `<section><p class="hint">${esc(t('viewStats', { s: st.students.length, d: st.desks.length, g: st.groups.length }))}</p></section>`;
     if (st.students.length) h += pointsSections(st, students);
 
-    if (st.groups.length) {
-      h += `<section><h3>${t('groupsTitle')}</h3><ul class="vgroups">`;
-      st.groups.forEach(g => {
-        const members = st.desks.filter(d => d.groupId === g.id && d.studentId).map(d => students.get(d.studentId)).filter(Boolean);
-        h += `<li><div class="vgname"><span class="swatch" style="background:${Layout.COLORS[g.color % Layout.COLORS.length]}"></span>${esc(Layout.groupName(g, st))} <span class="muted">${members.length}</span></div>
-          <div class="chips">${members.length ? members.map(s => nameChip(s, roles)).join('') : `<span class="muted">${t('nobody')}</span>`}</div></li>`;
-      });
-      h += '</ul></section>';
-    }
-
     if (st.students.length) {
-      h += `<section><h3>${t('summaryTitle')}</h3><ul class="rlist">`;
-      st.roles.forEach(r => {
-        const who = st.students.filter(s => (s.roles || []).includes(r.id));
-        h += `<li><span><b>${esc(Layout.roleName(r))}</b>: ${who.length ? who.map(s => esc(s.name)).join(', ') : `<span class="muted">${t('nobody')}</span>`}</span></li>`;
-      });
-      h += '</ul></section>';
-
       const seated = new Set(st.desks.map(d => d.studentId).filter(Boolean));
       const unseated = st.students.filter(s => !seated.has(s.id));
       if (unseated.length) {
