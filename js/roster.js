@@ -117,5 +117,5 @@
     return parseText(text);
   }
 
-  window.Roster = { parseText, parseFile, gender };
+  window.Roster = { parseText, parseFile, gender, loadXLSX };
 })();

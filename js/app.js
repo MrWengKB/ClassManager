@@ -515,24 +515,64 @@
     if (window.Sync) window.Sync.create().catch(() => {}); // a new class on Google Drive
     else Store.replace(Store.blank());
   });
-  $('#btnSave').addEventListener('click', () => {
-    const st = Store.state;
-    const blob = new Blob([JSON.stringify(st, null, 1)], { type: 'application/json' });
-    const a = document.createElement('a');
+  // Export: a readable Excel workbook (students, items, points by date, reading) plus a hidden
+  // "_data" sheet holding the whole class as JSON, so Import restores it exactly.
+  const DATA_SHEET = '_data', CHUNK = 30000;
+  $('#btnSave').addEventListener('click', async () => {
+    const st = Store.state, P = window.Points, R = window.Reading;
+    let XLSX;
+    try { XLSX = await window.Roster.loadXLSX(); } catch (e) { alert(t('fileError')); return; }
+    const roles = new Map(st.roles.map(r => [r.id, r]));
+    const seatGroup = new Map(st.desks.filter(d => d.studentId && d.groupId).map(d => [d.studentId, d.groupId]));
+    const groupName = id => { const g = st.groups.find(x => x.id === id); return g ? Layout.groupName(g, st) : ''; };
+    const items = st.pointItems, iname = it => P.itemName(it, t);
+    const wk = R.weekStart();
+    const students = [[t('xcName'), t('xcGender'), t('xcGroup'), t('xcRoles'), t('xcPoints'), ...items.map(iname), t('stBooks'), t('stRounds')]]
+      .concat(st.students.map(s => [s.name, s.gender === 'M' ? '♂' : s.gender === 'F' ? '♀' : '', groupName(seatGroup.get(s.id)), (s.roles || []).map(id => roles.get(id)).filter(Boolean).map(Layout.roleName).join(', '),
+        P.total(st, s.id), ...items.map(it => ((st.scores[s.id] || {})[it.id] || [0, 0])[1]), R.total(st, s.id), R.get(st, s.id).rounds]));
+    const itemRows = [['', t('colItem'), t('xcPoints'), t('xcFor'), t('xcTimes'), t('colTotal')]]
+      .concat(P.itemStats(st).map(x => [x.item.icon, iname(x.item), x.item.points, x.item.group ? t('forGroup') : t('xsStudents'), x.count, x.points]));
+    const byId = new Map(st.students.map(s => [s.id, s]));
+    const daily = [[t('colDate'), t('xcName'), t('colItem'), t('xcTimes'), t('xcPoints')]];
+    P.days(st).forEach(d => Object.keys(st.pointDays[d]).forEach(sid => Object.keys(st.pointDays[d][sid]).forEach(iid => {
+      const it = items.find(x => x.id === iid), v = st.pointDays[d][sid][iid];
+      if (it && byId.has(sid)) daily.push([d, byId.get(sid).name, iname(it), v[0], v[1]]);
+    })));
+    const reading = [[t('xcName'), t('stBooks'), t('stRounds'), t('xcProgress'), t('stWeek')]]
+      .concat(st.students.map(s => { const r = R.get(st, s.id); return [s.name, R.total(st, s.id), r.rounds, r.progress + '/' + R.RB, R.since(st, s.id, wk)]; }));
+    const json = JSON.stringify(st);
+    const data = [['classmanager', st.version || 1]];
+    for (let i = 0; i < json.length; i += CHUNK) data.push([json.slice(i, i + CHUNK)]);
+    const wb = XLSX.utils.book_new();
+    const add = (rows, name, widths) => { const ws = XLSX.utils.aoa_to_sheet(rows); if (widths) ws['!cols'] = widths.map(w => ({ wch: w })); XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31)); };
+    add([[st.title || t('appName')], [t('xNote')], []].concat(students), t('xsStudents'), [16, 8, 12, 18, 8, ...items.map(() => 10), 10, 10]);
+    add(itemRows, t('xsItems'), [4, 20, 8, 10, 8, 8]);
+    add(daily, t('xsDaily'), [12, 16, 20, 8, 8]);
+    add(reading, t('xsReading'), [16, 10, 10, 10, 10]);
+    add(data, DATA_SHEET);
+    wb.Workbook = { Sheets: wb.SheetNames.map(n => ({ Hidden: n === DATA_SHEET ? 1 : 0 })) };
     const d = new Date();
     const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-    a.href = URL.createObjectURL(blob);
-    a.download = `${(st.title || t('appName')).replace(/[\\/:*?"<>|]/g, '_')}-${stamp}.cm.json`;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    XLSX.writeFile(wb, `${(st.title || t('appName')).replace(/[\\/:*?"<>|]/g, '_')}-${stamp}.xlsx`);
   });
+  async function readClassFile(f) {
+    if (/\.(xlsx|xls|ods)$/i.test(f.name)) {
+      const XLSX = await window.Roster.loadXLSX();
+      const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
+      const ws = wb.Sheets[DATA_SHEET];
+      if (!ws) throw new Error('bad');
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
+      return JSON.parse(rows.slice(1).map(r => String(r[0] || '')).join(''));
+    }
+    return JSON.parse(await f.text());
+  }
   $('#btnOpen').addEventListener('click', () => $('#openFile').click());
   $('#openFile').addEventListener('change', async e => {
     const f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
     try {
-      const data = JSON.parse(await f.text());
+      const data = await readClassFile(f);
       if (!data || (data.app !== 'classmanager' && data.app !== 'paipaizuo')) throw new Error('bad');
       ui.sel = new Set(); ui.picked = null;
       if (window.Sync) { window.Sync.create(data).catch(() => {}); return; } // opened file becomes a new class
