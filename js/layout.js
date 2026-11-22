@@ -26,6 +26,13 @@
     return state.groups.length % COLORS.length;
   }
 
+  const FW = 260, SIDE_L = 250, SIDE_R = 150; // front strip, and the view page's side tools
+  function frontX(state) {
+    const bb = bbox(state.desks);
+    let fx = bb ? Math.max(10, Math.min(BW - FW - 10, (bb.x1 + bb.x2) / 2 - FW / 2)) : 40;
+    if (ui && ui.frontSides) fx = Math.max(fx, SIDE_L + 20);
+    return fx;
+  }
   function bbox(desks) {
     if (!desks.length) return null;
     let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
@@ -69,10 +76,14 @@
 
     let html = '';
     // front of the class, centred over the desks
-    const bb = bbox(state.desks);
-    const fw = 260;
-    const fx = bb ? Math.max(10, Math.min(BW - fw - 10, (bb.x1 + bb.x2) / 2 - fw / 2)) : 40;
-    html += `<div class="front" style="left:${fx}px;width:${fw}px">${esc(t('front'))}</div>`;
+    const fx = frontX(state);
+    html += `<div class="front" style="left:${fx}px;width:${FW}px">${esc(t('front'))}</div>`;
+    // view page: lucky draw on the left of the front, timer on the right
+    if (ui.frontSides) {
+      const sides = ui.frontSides();
+      html += `<div class="fside fleft" style="left:${fx - SIDE_L - 10}px;width:${SIDE_L}px">${sides.left}</div>`;
+      html += `<div class="fside fright" style="left:${fx + FW + 10}px;width:${SIDE_R}px">${sides.right}</div>`;
+    }
 
     // group outlines + labels
     state.groups.forEach(g => {
@@ -369,6 +380,7 @@
   function fit() {
     const desks = window.Store.state.desks;
     const b = bbox(desks) || { x1: 0, y1: 0, x2: 900, y2: 600 };
+    if (ui.frontSides) b.x2 = Math.max(b.x2, frontX(window.Store.state) + FW + 10 + SIDE_R);
     const z = Math.min((stage.clientWidth - 30) / (b.x2 + 40), (stage.clientHeight - 30) / (b.y2 + 40), 1.4);
     setZoom(Math.max(0.3, z));
     stage.scrollLeft = 0; stage.scrollTop = 0;

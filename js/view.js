@@ -185,7 +185,7 @@
     renderSide();
   }
 
-  $('#langSel').addEventListener('change', e => { window.I18n.setLang(e.target.value); renderAll(); });
+  $('#langSel').addEventListener('change', e => { window.I18n.setLang(e.target.value); renderAll(); ClassTools.relang(); });
   $('#btnPrint').addEventListener('click', () => window.print());
   $('#zoomIn').addEventListener('click', () => Layout.setZoom(ui.zoom * 1.15));
   $('#zoomOut').addEventListener('click', () => Layout.setZoom(ui.zoom / 1.15));
@@ -205,6 +205,7 @@
   });
   window.addEventListener('afterprint', () => { if (preZoom !== null) { ui.zoom = preZoom; preZoom = null; } renderAll(); });
 
+  ClassTools.init({ ui, board: $('#board'), rerender: () => Layout.render() });
   Layout.init({
     board: $('#board'), stage: $('#stage'), sizer: $('#sizer'), ui, readOnly: true,
     onSelectionChange: () => {}, onDeskClick: () => {}, onPick: () => {},
