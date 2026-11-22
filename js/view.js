@@ -67,7 +67,7 @@
     const P = window.Points;
     let h = `<section><h3>${t('leaderboard')}</h3>`;
     if (!st.pointItems.length) h += `<p class="hint">${t('noItems')}</p>`;
-    else h += `<p class="hint small">${t('clickDeskHint')}</p>`;
+    else h += `<p class="hint small">${t('clickDeskHint')}${st.groups.length && st.pointItems.some(it => it.group) ? ' ' + t('clickGroupHint') : ''}</p>`;
     h += `<ol class="lboard">${P.leaderboard(st).map(r =>
       `<li class="${r.rank <= 3 && r.total > 0 ? 'top' + r.rank : ''}"><b class="rank">${r.rank}</b><span>${esc(r.student.name)}</span><span class="spacer"></span><b class="tot">${r.total}</b></li>`).join('')}</ol></section>`;
 
@@ -90,7 +90,9 @@
     if (recent.length) {
       const items = new Map(st.pointItems.map(it => [it.id, it]));
       h += `<section><h3>${t('recentTitle')}</h3><ul class="recent">${recent.map(e => {
-        const s = students.get(e.s), it = items.get(e.i);
+        const it = items.get(e.i);
+        const g = e.g && st.groups.find(x => x.id === e.g);
+        const s = e.g ? { name: (g ? Layout.groupName(g, st) : t('forGroup')) + ' ×' + e.s.length } : students.get(e.s);
         const time = new Date(e.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         return `<li><span class="muted">${esc(time)}</span><span>${esc(it.icon)} ${esc(s ? s.name : '?')}</span><b class="${e.p < 0 ? 'neg' : 'pos'}">${e.p > 0 ? '+' : ''}${e.p}</b>
           <span class="spacer"></span><button class="icon" data-undo="${esc(e.id)}" title="${esc(t('undo'))}" aria-label="${esc(t('undo'))}">↶</button></li>`;
@@ -101,18 +103,31 @@
 
   /* ---------- giving points ---------- */
   const pop = $('#award');
-  let popStudent = null;
-  function openPopover(studentId, x, y) {
-    const st = Store.state;
-    const s = st.students.find(v => v.id === studentId);
-    if (!s) return;
-    popStudent = studentId;
+  let popTarget = null; // { student } or { group }
+  function itemButtons(list) {
     const P = window.Points;
-    pop.innerHTML = `<div class="award-head"><b>${esc(t('pointsFor', { name: s.name }))}</b><span class="muted">${esc(t('totalPoints', { n: P.total(st, s.id) }))}</span>
-        <button class="icon" data-close="1" aria-label="${esc(t('close'))}">✕</button></div>` +
-      (st.pointItems.length
-        ? `<div class="award-items">${st.pointItems.map(it => `<button data-item="${esc(it.id)}"><span class="picon">${esc(it.icon)}</span><span>${esc(P.itemName(it, t))}</span><b class="${it.points < 0 ? 'neg' : 'pos'}">${it.points > 0 ? '+' : ''}${it.points}</b></button>`).join('')}</div>`
-        : `<p class="hint">${t('noItems')}</p>`);
+    return `<div class="award-items">${list.map(it => `<button data-item="${esc(it.id)}"><span class="picon">${esc(it.icon)}</span><span>${esc(P.itemName(it, t))}</span><b class="${it.points < 0 ? 'neg' : 'pos'}">${it.points > 0 ? '+' : ''}${it.points}</b></button>`).join('')}</div>`;
+  }
+  function openPopover(target, x, y) {
+    const st = Store.state;
+    const P = window.Points;
+    let head, body;
+    if (target.group) {
+      const g = st.groups.find(v => v.id === target.group);
+      if (!g) return;
+      const members = P.groupMembers(st, g.id);
+      const list = st.pointItems.filter(it => it.group);
+      head = `<b>${esc(t('groupPointsFor', { name: Layout.groupName(g, st), n: members.length }))}</b>`;
+      body = !members.length ? `<p class="hint">${t('groupEmpty')}</p>` : list.length ? itemButtons(list) : `<p class="hint">${t('noGroupItems')}</p>`;
+    } else {
+      const s = st.students.find(v => v.id === target.student);
+      if (!s) return;
+      const list = st.pointItems.filter(it => !it.group);
+      head = `<b>${esc(t('pointsFor', { name: s.name }))}</b><span class="muted">${esc(t('totalPoints', { n: P.total(st, s.id) }))}</span>`;
+      body = list.length ? itemButtons(list) : `<p class="hint">${t(st.pointItems.length ? 'noStudentItems' : 'noItems')}</p>`;
+    }
+    popTarget = target;
+    pop.innerHTML = `<div class="award-head">${head}<button class="icon" data-close="1" aria-label="${esc(t('close'))}">✕</button></div>` + body;
     pop.hidden = false;
     const wrap = pop.parentElement.getBoundingClientRect();
     const w = pop.offsetWidth, h = pop.offsetHeight;
@@ -121,7 +136,7 @@
     const first = pop.querySelector('[data-item]');
     if (first) first.focus();
   }
-  function closePopover() { pop.hidden = true; popStudent = null; }
+  function closePopover() { pop.hidden = true; popTarget = null; }
 
   function award(studentId, itemId) {
     const d = { type: 'add', s: studentId, i: itemId, id: Store.uid('e'), at: new Date().toISOString() };
@@ -129,6 +144,15 @@
     Store.commit(st => { entry = window.Points.add(st, d.s, d.i, d.id, d.at); });
     if (!entry) return;
     flyScore(studentId, entry.p);
+    queue(d);
+  }
+  function awardGroup(groupId, itemId) {
+    const members = window.Points.groupMembers(Store.state, groupId);
+    const d = { type: 'addGroup', g: groupId, members, i: itemId, id: Store.uid('e'), at: new Date().toISOString() };
+    let entry = null;
+    Store.commit(st => { entry = window.Points.addGroup(st, d.g, d.i, d.id, d.at, d.members); });
+    if (!entry) return;
+    entry.s.forEach(sid => flyScore(sid, entry.p));
     queue(d);
   }
   function undoAward(entryId) {
@@ -188,15 +212,21 @@
   window.addEventListener('beforeunload', e => { if (pending.length) { e.preventDefault(); e.returnValue = ''; } });
 
   $('#board').addEventListener('click', e => {
+    const label = e.target.closest('.glabel');
+    if (label) { openPopover({ group: label.dataset.group }, e.clientX, e.clientY); return; }
     const deskEl = e.target.closest('.desk');
     const desk = deskEl && Store.state.desks.find(d => d.id === deskEl.dataset.desk);
     if (!desk || !desk.studentId) { closePopover(); return; }
-    openPopover(desk.studentId, e.clientX, e.clientY);
+    openPopover({ student: desk.studentId }, e.clientX, e.clientY);
   });
   pop.addEventListener('click', e => {
     if (e.target.closest('[data-close]')) { closePopover(); return; }
     const b = e.target.closest('[data-item]');
-    if (b && popStudent) { award(popStudent, b.dataset.item); closePopover(); }
+    if (b && popTarget) {
+      if (popTarget.group) awardGroup(popTarget.group, b.dataset.item);
+      else award(popTarget.student, b.dataset.item);
+      closePopover();
+    }
   });
   $('#side').addEventListener('click', e => {
     const b = e.target.closest('[data-undo]');

@@ -274,6 +274,7 @@
       h += `<li><button class="icon picon" data-act="cycleIcon" data-id="${it.id}" title="${esc(t('rename'))}">${esc(it.icon)}</button>
         <input class="pname" data-item="${it.id}" data-field="name" value="${esc(P.itemName(it, t))}" maxlength="40" aria-label="${esc(t('rename'))}">
         <input class="ppts" type="number" min="-100" max="100" step="1" data-item="${it.id}" data-field="points" value="${it.points}" title="${esc(t('pointsLabel'))}" aria-label="${esc(t('pointsLabel'))}">
+        <button class="ptarget${it.group ? ' grp' : ''}" data-act="toggleTarget" data-id="${it.id}" title="${esc(t('targetTip'))}">${t(it.group ? 'forGroup' : 'forStudent')}</button>
         <button class="icon danger" data-act="delItem" data-id="${it.id}" title="${esc(t('delete'))}">✕</button></li>`;
     });
     h += `</ul><form class="addrow" data-form="addItem"><input id="newItem" placeholder="${esc(t('newItemPh'))}" autocomplete="off" maxlength="40">
@@ -422,6 +423,7 @@
       const it = Store.state.pointItems.find(x => x.id === id); if (!it) return;
       if (confirm(t('confirmDeleteItem', { name: window.Points.itemName(it, t) }))) Store.commit(st => { st.pointItems = st.pointItems.filter(x => x.id !== id); });
     },
+    toggleTarget: id => Store.commit(st => { const it = st.pointItems.find(x => x.id === id); if (it) it.group = !it.group; }),
     resetScores: () => { if (confirm(t('confirmResetScores'))) Store.commit(st => { st.scores = {}; st.pointLog = []; }); },
     toggleRole: id => {
       const sid = ui.picked; if (!sid) return;

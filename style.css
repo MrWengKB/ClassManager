@@ -354,3 +354,7 @@ ul.istats, ul.recent { list-style: none; margin: 0; padding: 0; display: grid; g
 .award-items button span:nth-child(2) { flex: 1; text-align: left; }
 @media print { .dscore, .award, .fly { display: none !important; } }
 .view-page .board .desk { overflow: visible; }
+button.ptarget { flex: none; min-height: 30px; padding: 2px 8px; font-size: 12px; border-radius: 999px; background: #eef4fd; color: #2c5d99; border-color: #b8cff2; }
+button.ptarget.grp { background: #fff3d6; color: #8a5a12; border-color: #f1d899; }
+.view-page .board .glabel { pointer-events: auto; cursor: pointer; }
+.view-page .board .glabel:hover { filter: brightness(.95); box-shadow: 0 0 0 3px rgba(224,112,58,.35); }

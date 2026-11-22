@@ -81,7 +81,7 @@
       if (!b) return;
       const col = COLORS[g.color % COLORS.length];
       html += `<div class="gframe" style="left:${b.x1 - 8}px;top:${b.y1 - 8}px;width:${b.w + 16}px;height:${b.h + 16}px;--gc:${col}"></div>`;
-      html += `<div class="glabel" data-group="${g.id}" style="left:${b.x1 - 8}px;top:${b.y1 - 30}px;--gc:${col}" title="${esc(t('rename'))}">${esc(groupName(g, state))}</div>`;
+      html += `<div class="glabel" data-group="${g.id}" style="left:${b.x1 - 8}px;top:${b.y1 - 30}px;--gc:${col}"${ui.tab === 'layout' ? ` title="${esc(t('rename'))}"` : ''}>${esc(groupName(g, state))}</div>`;
     });
 
     state.desks.forEach(d => {
