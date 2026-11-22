@@ -14,6 +14,7 @@
   <title>Class Manager</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
+  <script src="js/mobile.js"></script>
   <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
   <script>window.Auth.requireLogin();</script>
@@ -100,5 +101,24 @@
   <script src="js/app.js"></script>
   <script src="js/cloud.js"></script>
   <script src="js/sync.js"></script>
+  <script>
+    // On a phone, suggest a computer or tablet; closing the notice keeps the full Manage page.
+    (function () {
+      if (!window.Mobile.on) return;
+      try { if (sessionStorage.getItem('classmanager:mobileNote')) return; } catch (e) { /* ignore */ }
+      const t = window.I18n.t;
+      const wrap = document.createElement('div');
+      wrap.className = 'mdo';
+      wrap.innerHTML = '<div class="mdc"><div class="mdicon">💻</div><h3></h3><p></p><div class="mdbtns"><button class="mdbtn primary"></button><a class="mdbtn" href="index.html"></a></div></div>';
+      wrap.querySelector('h3').textContent = t('mAdminTitle');
+      wrap.querySelector('p').textContent = t('mAdminMsg');
+      wrap.querySelector('button').textContent = t('mAdminGo');
+      wrap.querySelector('a').textContent = t('viewLinkFull');
+      const close = () => { wrap.remove(); try { sessionStorage.setItem('classmanager:mobileNote', '1'); } catch (e) { /* ignore */ } };
+      wrap.querySelector('button').addEventListener('click', close);
+      wrap.addEventListener('click', e => { if (e.target === wrap) close(); });
+      document.body.appendChild(wrap);
+    })();
+  </script>
 </body>
 </html>
