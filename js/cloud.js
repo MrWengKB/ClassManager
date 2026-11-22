@@ -127,6 +127,11 @@
     return { version: v, updated: res.modifiedTime };
   }
 
+  async function version(id) {
+    const meta = await request('GET', `${API}/files/${encodeURIComponent(id)}?fields=appProperties`);
+    return { version: Number(meta.appProperties && meta.appProperties.v) || 0 };
+  }
+
   // Same shape for every caller: api('list'), api('load', {id}), api('create', {state}), api('save', {id, state, version})
   function api(action, p) {
     p = p || {};
@@ -134,6 +139,7 @@
     if (action === 'load') return load(p.id);
     if (action === 'create') return create(p.state);
     if (action === 'save') return save(p.id, p.state, p.version);
+    if (action === 'version') return version(p.id);
     return Promise.reject(new CloudError('badAction'));
   }
 

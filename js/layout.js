@@ -100,6 +100,7 @@
         inner += `<div class="dname${long}">${esc(st.name)}</div>`;
         const rs = st.roles.map(r => roles.get(r)).filter(Boolean);
         if (rs.length) inner += `<div class="dbadges">${rs.map(r => `<span class="badge">${esc(roleName(r))}</span>`).join('')}</div>`;
+        if (ui.scores) inner += `<span class="dscore${ui.scores.get(st.id) < 0 ? ' neg' : ''}">${ui.scores.get(st.id) || 0}</span>`;
       }
       html += `<div class="${cls.join(' ')}${g ? ' grouped' : ''}" data-desk="${d.id}" style="${style}">${inner}</div>`;
     });

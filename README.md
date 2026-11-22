@@ -4,8 +4,8 @@ A classroom seating planner for teachers. Open `index.html` in a browser (or Git
 
 ## Pages
 
-- `index.html`: the class view. It shows the finished result of the four management steps (desks, groups, seats and roles) and can be printed.
-- `admin.html`: the four management tabs (Layout, Class list, Seating, Roles). You need to sign in first.
+- `index.html`: the class view. It shows the finished result of the management steps (desks, groups, seats and roles) and can be printed. Click a student's desk to give points; the sidebar shows the leaderboard, group ranking, totals per point item and the latest awards (with undo).
+- `admin.html`: the management tabs (Layout, Class list, Seating, Roles, Points). You need to sign in first.
 - `login.html`: Sign in with Google.
 
 ## Google sign-in and Google Drive

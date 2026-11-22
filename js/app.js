@@ -21,7 +21,7 @@
   };
   try {
     const saved = JSON.parse((localStorage.getItem('classmanager:ui') || localStorage.getItem('paipaizuo:ui')) || '{}');
-    if (['layout', 'roster', 'assign', 'roles'].includes(saved.tab)) ui.tab = saved.tab;
+    if (['layout', 'roster', 'assign', 'roles', 'points'].includes(saved.tab)) ui.tab = saved.tab;
     if (saved.method === 'gender') ui.method = 'gender';
   } catch (e) { /* ignore */ }
   function saveUi() { try { localStorage.setItem('classmanager:ui', JSON.stringify({ tab: ui.tab, method: ui.method })); } catch (e) { /* ignore */ } }
@@ -52,7 +52,7 @@
     $('#btnRedo').disabled = !Store.canRedo();
     document.querySelectorAll('.tab').forEach(b => {
       b.classList.toggle('active', b.dataset.tab === ui.tab);
-      b.querySelector('span').textContent = t({ layout: 'tabLayout', roster: 'tabRoster', assign: 'tabAssign', roles: 'tabRoles' }[b.dataset.tab]);
+      b.querySelector('span').textContent = t({ layout: 'tabLayout', roster: 'tabRoster', assign: 'tabAssign', roles: 'tabRoles', points: 'tabPoints' }[b.dataset.tab]);
     });
     $('#zoomOut').title = t('zoomOut'); $('#zoomIn').title = t('zoomIn'); $('#zoomFit').textContent = t('zoomFit');
     $('#zoomVal').textContent = Math.round(ui.zoom * 100) + '%';
@@ -90,6 +90,7 @@
     if (ui.tab === 'layout') h = sideLayout(st);
     else if (ui.tab === 'roster') h = sideRoster(st);
     else if (ui.tab === 'assign') h = sideAssign(st);
+    else if (ui.tab === 'points') h = sidePoints(st);
     else h = sideRoles(st);
     const scroll = side.scrollTop;
     side.innerHTML = h;
@@ -266,6 +267,27 @@
     return h;
   }
 
+  function sidePoints(st) {
+    const P = window.Points;
+    let h = `<section><h3>${t('pointItemsTitle')}</h3><p class="hint small">${t('pointItemsHelp')}</p><ul class="plist">`;
+    st.pointItems.forEach(it => {
+      h += `<li><button class="icon picon" data-act="cycleIcon" data-id="${it.id}" title="${esc(t('rename'))}">${esc(it.icon)}</button>
+        <input class="pname" data-item="${it.id}" data-field="name" value="${esc(P.itemName(it, t))}" maxlength="40" aria-label="${esc(t('rename'))}">
+        <input class="ppts" type="number" min="-100" max="100" step="1" data-item="${it.id}" data-field="points" value="${it.points}" title="${esc(t('pointsLabel'))}" aria-label="${esc(t('pointsLabel'))}">
+        <button class="icon danger" data-act="delItem" data-id="${it.id}" title="${esc(t('delete'))}">✕</button></li>`;
+    });
+    h += `</ul><form class="addrow" data-form="addItem"><input id="newItem" placeholder="${esc(t('newItemPh'))}" autocomplete="off" maxlength="40">
+      <input id="newItemPts" class="ppts" type="number" min="-100" max="100" step="1" value="1" aria-label="${esc(t('pointsLabel'))}"><button>${t('add')}</button></form></section>`;
+
+    h += `<section><h3>${t('leaderboard')}</h3>`;
+    if (!st.students.length) h += `<p class="hint">${t('noStudents')}</p>`;
+    else if (!st.pointLog.length && !Object.keys(st.scores).length) h += `<p class="hint">${t('noScoresYet')}</p>`;
+    else h += `<ol class="lboard">${P.leaderboard(st).map(r => `<li><b class="rank">${r.rank}</b><span>${esc(r.student.name)}</span><span class="spacer"></span><b class="tot">${r.total}</b></li>`).join('')}</ol>`;
+    h += `<div class="btnrow"><a class="navbtn" href="index.html">👁 ${t('openView')}</a>
+      <button data-act="resetScores" class="danger ghostbtn" ${Object.keys(st.scores).length ? '' : 'disabled'}>${t('resetScores')}</button></div></section>`;
+    return h;
+  }
+
   /* ---------- actions ---------- */
   async function doImport(replace) {
     const list = window.Roster.parseText(ui.importText);
@@ -389,6 +411,18 @@
       const r = Store.state.roles.find(x => x.id === id); if (!r) return;
       if (confirm(t('confirmDeleteRole', { name: roleName(r) }))) Store.commit(st => { st.roles = st.roles.filter(x => x.id !== id); });
     },
+    cycleIcon: id => Store.commit(st => {
+      const it = st.pointItems.find(x => x.id === id); if (!it) return;
+      const list = window.Points.ICONS, used = new Set(st.pointItems.map(x => x.icon));
+      let k = list.indexOf(it.icon);
+      for (let n = 0; n < list.length; n++) { k = (k + 1) % list.length; if (!used.has(list[k])) break; }
+      it.icon = list[k];
+    }),
+    delItem: id => {
+      const it = Store.state.pointItems.find(x => x.id === id); if (!it) return;
+      if (confirm(t('confirmDeleteItem', { name: window.Points.itemName(it, t) }))) Store.commit(st => { st.pointItems = st.pointItems.filter(x => x.id !== id); });
+    },
+    resetScores: () => { if (confirm(t('confirmResetScores'))) Store.commit(st => { st.scores = {}; st.pointLog = []; }); },
     toggleRole: id => {
       const sid = ui.picked; if (!sid) return;
       Store.commit(st => {
@@ -417,6 +451,12 @@
       const v = $('#newRole').value.trim();
       if (!v) return;
       Store.commit(st => st.roles.push({ id: Store.uid('r'), key: '', name: v }));
+    } else if (f === 'addItem') {
+      const v = $('#newItem').value.trim();
+      if (!v) return;
+      const pts = Math.max(-100, Math.min(100, Math.round(+$('#newItemPts').value || 1)));
+      Store.commit(st => st.pointItems.push({ id: Store.uid('p'), key: '', name: v, icon: window.Points.nextIcon(st), points: pts }));
+      setTimeout(() => { const i = $('#newItem'); if (i) i.focus(); }, 0);
     }
   });
   side.addEventListener('input', e => {
@@ -434,6 +474,18 @@
     else if (el.id === 'consB') ui.consB = el.value;
     else if (el.id === 'consType') ui.consType = el.value;
     else if (el.id === 'importFile' && el.files[0]) importFile(el.files[0]);
+    else if (el.dataset.item) {
+      const id = el.dataset.item, field = el.dataset.field;
+      Store.commit(st => {
+        const it = st.pointItems.find(x => x.id === id); if (!it) return;
+        if (field === 'points') it.points = Math.max(-100, Math.min(100, Math.round(+el.value || 0)));
+        else {
+          const v = el.value.trim();
+          if (!v) return;
+          it.name = it.key && v === t('pt_' + it.key) ? '' : v;
+        }
+      });
+    }
   });
   // drag or click names in the sidebar
   side.addEventListener('pointerdown', e => {
@@ -555,6 +607,12 @@
     onZoom: renderHeader
   });
   Store.subscribe(renderAll);
+  // Without Google Drive, the class view saves points in this browser too: pick them up here.
+  if (!(window.CM_CONFIG && window.CM_CONFIG.useDrive)) {
+    window.addEventListener('storage', e => {
+      if (e.key === 'classmanager:v1' && e.newValue) { try { Store.load(JSON.parse(e.newValue), false); } catch (err) { /* ignore */ } }
+    });
+  }
   renderAll();
   requestAnimationFrame(() => { if (Store.state.desks.length) Layout.fit(); });
 })();

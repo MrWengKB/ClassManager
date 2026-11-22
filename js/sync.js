@@ -31,14 +31,14 @@
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function render() { renderStatus(); renderClasses(); }
 
-  async function open(id) {
+  async function open(id, refit = true) {
     loading = true; status = 'loading'; render();
     const { record } = await Cloud.api('load', { id });
     currentId = id; version = record.version || 0;
     Cloud.rememberClassId(id);
     Store.load(record.state);
     loading = false; status = 'saved'; render();
-    requestAnimationFrame(() => window.Layout.fit());
+    if (refit) requestAnimationFrame(() => window.Layout.fit());
   }
 
   // Start a new class on Drive, empty or from the given data (e.g. a file the teacher opened).
@@ -113,6 +113,16 @@
       else if (v !== currentId) { await flush(); await open(v); }
     } catch (err) { status = 'error'; render(); }
   });
+  // Coming back to this tab: pick up points given in the class view (or changes made elsewhere) meanwhile.
+  async function checkRemote() {
+    if (document.hidden || loading || dirty || saving || timer || !currentId || !window.Auth.token()) return;
+    try {
+      const { version: v } = await Cloud.api('version', { id: currentId });
+      if (v !== version && !dirty && !saving) await open(currentId, false);
+    } catch (e) { /* ignore */ }
+  }
+  window.addEventListener('focus', checkRemote);
+  document.addEventListener('visibilitychange', checkRemote);
   window.addEventListener('beforeunload', e => { if (dirty || saving) { e.preventDefault(); e.returnValue = ''; } });
 
   window.Sync = { create, flush, render };

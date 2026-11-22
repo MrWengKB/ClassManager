@@ -82,7 +82,7 @@ main { flex: 1; display: flex; min-height: 0; }
 
 /* side panel */
 .panel { width: 370px; flex: none; background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
-.tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
+.tabs { display: grid; grid-template-columns: repeat(5, 1fr); border-bottom: 1px solid var(--line); }
 .tab { border: none; border-radius: 0; border-bottom: 3px solid transparent; flex-direction: column; gap: 2px; padding: 8px 4px; font-size: 13px; background: none; }
 .tab b { width: 20px; height: 20px; border-radius: 50%; background: var(--line); font-size: 12px; display: grid; place-items: center; }
 .tab.active { border-bottom-color: var(--accent); font-weight: 600; }
@@ -305,3 +305,53 @@ body.cloud-on .cloudbar { display: flex; }
 .auth-card .privacy { text-align: center; font-size: 12px; }
 .auth-card .privacy a { color: var(--muted); }
 .foot a { color: var(--muted); }
+
+/* points */
+ul.plist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.plist li { display: flex; align-items: center; gap: 6px; }
+.plist .pname { flex: 1; min-width: 0; width: 0; }
+.plist .ppts { width: 56px; flex: none; }
+.plist button.icon.danger { flex: none; min-width: 28px; padding: 2px 6px; border-color: transparent; background: none; }
+.ppts { width: 64px; text-align: center; }
+.picon { font-size: 18px; line-height: 1; }
+button.picon { min-width: 36px; padding: 2px 6px; }
+.addrow .ppts { flex: none; }
+ol.lboard { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow-y: auto; }
+.lboard li { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 8px; font-size: 14px; }
+.lboard li:nth-child(odd) { background: #faf8f4; }
+.lboard .rank { width: 22px; text-align: center; color: var(--muted); font-size: 12px; }
+.lboard .tot { font-variant-numeric: tabular-nums; }
+.lboard li.top1 { background: #fff3d6; } .lboard li.top1 .rank { color: #b7791f; }
+.lboard li.top2 { background: #eef1f5; }
+.lboard li.top3 { background: #f8ece3; }
+ul.istats, ul.recent { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14px; }
+.istats .muted { font-size: 12px; margin-top: 2px; }
+.recent li { display: flex; align-items: center; gap: 8px; }
+.recent button.icon { min-height: 26px; min-width: 26px; padding: 0 6px; border-color: transparent; background: none; color: var(--muted); }
+.recent button.icon:hover { border-color: var(--line); }
+.pos { color: var(--ok); } .neg { color: var(--danger); }
+
+.view-page .board .desk:not(.empty) { cursor: pointer; }
+.view-page .board .desk:not(.empty):hover { box-shadow: 0 0 0 3px rgba(224,112,58,.35); }
+.dscore {
+  position: absolute; top: -9px; right: -9px; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 12px;
+  background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2); font-variant-numeric: tabular-nums;
+}
+.dscore.neg { background: var(--danger); }
+.fly { position: absolute; left: 50%; top: 0; transform: translate(-50%, 0); font-weight: 800; font-size: 22px; pointer-events: none; animation: fly 1.1s ease-out forwards; text-shadow: 0 1px 0 #fff; }
+@keyframes fly { to { transform: translate(-50%, -48px); opacity: 0; } }
+.award {
+  position: absolute; z-index: 50; width: 280px; max-width: calc(100% - 16px); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); padding: 10px;
+}
+.award[hidden] { display: none; }
+.award-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.award-head b { flex: 1 1 auto; }
+.award-head .muted { font-size: 12px; }
+.award-head button.icon { min-height: 26px; min-width: 26px; padding: 0; border-color: transparent; }
+.award-items { display: grid; gap: 6px; }
+.award-items button { width: 100%; justify-content: flex-start; gap: 8px; min-height: 40px; }
+.award-items button span:nth-child(2) { flex: 1; text-align: left; }
+@media print { .dscore, .award, .fly { display: none !important; } }
+.view-page .board .desk { overflow: visible; }

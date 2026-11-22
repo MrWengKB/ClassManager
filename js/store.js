@@ -8,7 +8,7 @@
     return [{ id: 'r_leader', key: 'leader', name: '' }, { id: 'r_monitor', key: 'monitor', name: '' }];
   }
   function blank() {
-    return { app: 'classmanager', version: 1, title: '', desks: [], groups: [], students: [], roles: defaultRoles(), constraints: [] };
+    return { app: 'classmanager', version: 1, title: '', desks: [], groups: [], students: [], roles: defaultRoles(), constraints: [], pointItems: window.Points.defaults(), scores: {}, pointLog: [] };
   }
 
   // Bring any loaded / mutated state into a consistent shape and drop dangling references.
@@ -42,6 +42,7 @@
     b.students.forEach(st => { st.roles = st.roles.filter((r, i, a) => rid.has(r) && a.indexOf(r) === i); });
 
     b.constraints = b.constraints.filter(c => c && sid.has(c.a) && sid.has(c.b) && c.a !== c.b && (c.type === 'adjacent' || c.type === 'group'));
+    window.Points.normalize(b, s, sid);
     return b;
   }
 
