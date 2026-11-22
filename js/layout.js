@@ -62,7 +62,7 @@
     const roles = new Map(state.roles.map(r => [r.id, r]));
     const groups = new Map(state.groups.map(g => [g.id, g]));
     const broken = new Set();
-    if (!layoutMode) {
+    if (!layoutMode && ui.tab !== 'view') {
       const ids = new Set(window.Seating.brokenConstraints(state));
       state.constraints.forEach(c => { if (ids.has(c.id)) { broken.add(c.a); broken.add(c.b); } });
     }
@@ -446,6 +446,16 @@
 
   function init(opts) {
     board = opts.board; stage = opts.stage; sizer = opts.sizer; ctx = opts; ui = opts.ui;
+    if (!opts.readOnly) bindEditing();
+    // Ctrl + wheel zoom
+    stage.addEventListener('wheel', e => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      setZoom(ui.zoom * (e.deltaY < 0 ? 1.1 : 0.9));
+    }, { passive: false });
+  }
+
+  function bindEditing() {
     board.addEventListener('pointerdown', e => {
       if (e.button !== 0) return;
       if (ui.tab === 'layout') layoutDown(e); else seatDown(e);
@@ -454,12 +464,6 @@
       const label = e.target.closest('.glabel');
       if (label && ui.tab === 'layout') renameGroup(label.dataset.group);
     });
-    // Ctrl + wheel zoom
-    stage.addEventListener('wheel', e => {
-      if (!e.ctrlKey) return;
-      e.preventDefault();
-      setZoom(ui.zoom * (e.deltaY < 0 ? 1.1 : 0.9));
-    }, { passive: false });
   }
 
   window.Layout = {

@@ -2,6 +2,12 @@
 
 A classroom seating planner for teachers. Open `index.html` in a browser (or GitHub Pages); there is nothing to install. Everything is saved automatically in the browser, and **Save / Open** writes and reads a `.cm.json` file (older `.ppz.json` files from Seat Manager still open) so you can keep one file per class.
 
+## Pages
+
+- `index.html`: the class view. It shows the finished result of the four management steps (desks, groups, seats and roles) and can be printed. Anyone can open it.
+- `admin.html`: the four management tabs (Layout, Class list, Seating, Roles). You need to sign in first.
+- `login.html`: create an account or sign in. For now, accounts are kept only in this browser: the password is stored as a salted PBKDF2 hash, never as plain text. This is not real protection yet, because there is no server.
+
 ## Features
 
 1. **Layout** (`js/layout.js`): place desks on an empty floor. Add single desks or ready-made groups of 4 or 6, drag them around, box-select, duplicate (Ctrl+D), delete and nudge with the arrow keys. You can also generate rows (single desks or in pairs). Select desks and click **Make a group** to form groups, and double-click a group label to rename it.

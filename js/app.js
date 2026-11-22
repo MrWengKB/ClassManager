@@ -57,6 +57,10 @@
     $('#zoomOut').title = t('zoomOut'); $('#zoomIn').title = t('zoomIn'); $('#zoomFit').textContent = t('zoomFit');
     $('#zoomVal').textContent = Math.round(ui.zoom * 100) + '%';
     $('#footNote').textContent = t('autosaved');
+    $('#lnkView span').textContent = t('viewLink');
+    $('#lnkView').title = t('viewLink');
+    $('#btnSignOut span').textContent = t('signOut');
+    $('#btnSignOut').title = t('signedInAs', { name: window.Auth.current() || '' });
   }
 
   /* ---------- helpers ---------- */
@@ -479,6 +483,7 @@
     } catch (err) { alert(t('fileError')); }
   });
   $('#btnPrint').addEventListener('click', () => window.print());
+  $('#btnSignOut').addEventListener('click', () => { window.Auth.signOut(); location.href = 'index.html'; });
   // offline download popup
   const offlineModal = $('#offlineModal');
   const closeOffline = () => { offlineModal.hidden = true; };
