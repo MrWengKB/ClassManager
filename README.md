@@ -18,7 +18,7 @@ Class Manager 是给老师用的班级管理网页：摆放座位、导入名单
 ### 功能
 
 - **Google 登录与云端保存**：每个班级是 Drive 里「Class Manager」文件夹中的一份 Google Sheet。网站只申请 `drive.file` 权限，只能看到它自己建立的文件。每次修改约一秒后自动保存；如果同一个班级在别的分页或电脑上改过，会先载入较新的版本，不会互相覆盖。
-- **在 Google Sheets 里查看和修改**：每个班级都是一份 Google Sheet，可以直接在 Sheets 里修改「学生」「加分项目」「职务」「阅读」分页（新增一行、删除一行或改内容），网站下次打开这个班级时会读入。其他分页只供查看。
+- **在 Google Sheets 里查看和修改**：每个班级都是一份 Google Sheet，可以直接在 Sheets 里修改 Students、Items、Roles、Reading 分页（新增一行、删除一行或改内容），网站下次打开这个班级时会读入。其他分页只供查看。Sheet 的分页名称、表头和内置名称一律用英文，网站显示时会按页面语言翻译。
 - **多个班级**：顶部下拉菜单切换班级，可以新建班级，也可以「导出 Excel」：学生、加分项目、每日加分、阅读各一个分页，方便查看，也是完整备份，在管理页「导入」就能还原。
 - **座位布局**：在空白地面上摆放单人桌或 4 人、6 人小组，可以拖动、框选、复制（Ctrl+D）、删除，也能一键生成整排座位。选中几张桌子就能组成小组，双击小组名称可以改名。
 - **导入名单**：粘贴文字，或选择 `.txt`、`.csv`、`.xlsx` 文件，一行一位学生。性别可写在逗号或 Tab 后面（`M/F`、`男/女`、`L/P`、`ஆண்/பெண்` 等）。
@@ -54,7 +54,7 @@ Class Manager is a classroom management website for teachers. Lay out the desks,
 ### Features
 
 - **Google sign-in and cloud saving**: each class is one Google Sheet in a `Class Manager` folder in the teacher's Drive. The site asks only for the `drive.file` permission, so it sees only the files it created. Changes are saved about a second after each edit. If the same class was changed in another tab or on another computer, the newer version is loaded first, so nothing is overwritten.
-- **View and edit in Google Sheets**: each class is a Google Sheet. You can edit the Students, Items, Roles and Reading tabs in Sheets (add, delete or change rows), and the site reads the changes the next time it opens the class. The other tabs are for reading only.
+- **View and edit in Google Sheets**: each class is a Google Sheet. You can edit the Students, Items, Roles and Reading tabs in Sheets (add, delete or change rows), and the site reads the changes the next time it opens the class. The other tabs are for reading only. Tab names, headers and built-in names in the Sheet are always in English; the site shows them in the page language.
 - **Multiple classes**: switch classes from the menu at the top, start a new class, or use **Export Excel** to get a workbook with sheets for students, point items, points by date and reading. It is also a full backup: **Import** on the Manage page restores it.
 - **Desk layout**: place single desks or groups of 4 or 6 on an empty floor. Drag, box-select, duplicate (Ctrl+D) and delete them, or generate whole rows at once. Select desks to make a group, and double-click a group name to rename it.
 - **Class list import**: paste text or choose a `.txt`, `.csv` or `.xlsx` file, one student per line. Gender can go after a comma or tab (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` and so on).
@@ -90,7 +90,7 @@ Class Manager ialah laman web pengurusan kelas untuk guru. Susun meja, import se
 ### Ciri-ciri
 
 - **Log masuk Google dan simpanan awan**: setiap kelas ialah satu fail dalam folder `Class Manager` di Drive guru. Laman ini hanya meminta kebenaran `drive.file`, jadi ia hanya nampak fail yang dibuatnya sendiri. Perubahan disimpan kira-kira sesaat selepas setiap suntingan. Jika kelas yang sama diubah di tab atau komputer lain, versi yang lebih baru dimuatkan dahulu supaya tiada yang ditimpa.
-- **Lihat dan sunting dalam Google Sheets**: setiap kelas ialah satu Google Sheet. Anda boleh menyunting tab Murid, Item, Jawatan dan Bacaan dalam Sheets (tambah, padam atau ubah baris), dan laman ini membaca perubahan apabila kelas dibuka semula. Tab lain hanya untuk dibaca.
+- **Lihat dan sunting dalam Google Sheets**: setiap kelas ialah satu Google Sheet. Anda boleh menyunting tab Murid, Item, Jawatan dan Bacaan dalam Sheets (tambah, padam atau ubah baris), dan laman ini membaca perubahan apabila kelas dibuka semula. Tab lain hanya untuk dibaca. Nama tab, tajuk lajur dan nama terbina dalam Sheet sentiasa dalam bahasa Inggeris; laman ini memaparkannya dalam bahasa halaman.
 - **Beberapa kelas**: tukar kelas melalui menu di bahagian atas, mulakan kelas baru, atau guna **Eksport Excel** untuk mendapatkan buku kerja dengan helaian murid, item mata, mata mengikut tarikh dan bacaan. Ia juga sandaran penuh: **Import** di halaman Urus akan memulihkannya.
 - **Susun atur meja**: letak meja seorang atau kumpulan 4 atau 6 di atas lantai kosong. Seret, pilih dengan kotak, salin (Ctrl+D) dan padam, atau jana sebaris penuh sekali gus. Pilih beberapa meja untuk membentuk kumpulan, dan klik dua kali nama kumpulan untuk menukar nama.
 - **Import senarai kelas**: tampal teks atau pilih fail `.txt`, `.csv` atau `.xlsx`, seorang murid setiap baris. Jantina boleh ditulis selepas koma atau tab (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` dan sebagainya).
@@ -126,7 +126,7 @@ Class Manager என்பது ஆசிரியர்களுக்கா�
 ### அம்சங்கள்
 
 - **Google உள்நுழைவும் மேகக்கணிச் சேமிப்பும்**: ஒவ்வொரு வகுப்பும் ஆசிரியரின் Drive-இல் உள்ள `Class Manager` கோப்புறையில் ஒரு கோப்பாகச் சேமிக்கப்படும். இந்தத் தளம் `drive.file` அனுமதியை மட்டுமே கேட்கும், எனவே தான் உருவாக்கிய கோப்புகளை மட்டுமே பார்க்கும். ஒவ்வொரு திருத்தத்துக்கும் சுமார் ஒரு வினாடிக்குப் பிறகு தானாகச் சேமிக்கப்படும். அதே வகுப்பு வேறு தாவலில் அல்லது கணினியில் மாற்றப்பட்டிருந்தால், புதிய பதிப்பு முதலில் ஏற்றப்படும், எதுவும் மேலெழுதப்படாது.
-- **Google Sheets-இல் பார்த்தல், திருத்துதல்**: ஒவ்வொரு வகுப்பும் ஒரு Google Sheet. மாணவர்கள், புள்ளி வகைகள், பொறுப்புகள், வாசிப்பு தாவல்களை Sheets-இல் நேரடியாகத் திருத்தலாம் (வரியைச் சேர்க்க, நீக்க, மாற்ற); அடுத்த முறை வகுப்பைத் திறக்கும்போது தளம் மாற்றங்களைப் படிக்கும். மற்ற தாவல்கள் பார்வைக்கு மட்டும்.
+- **Google Sheets-இல் பார்த்தல், திருத்துதல்**: ஒவ்வொரு வகுப்பும் ஒரு Google Sheet. மாணவர்கள், புள்ளி வகைகள், பொறுப்புகள், வாசிப்பு தாவல்களை Sheets-இல் நேரடியாகத் திருத்தலாம் (வரியைச் சேர்க்க, நீக்க, மாற்ற); அடுத்த முறை வகுப்பைத் திறக்கும்போது தளம் மாற்றங்களைப் படிக்கும். மற்ற தாவல்கள் பார்வைக்கு மட்டும். Sheet-இல் தாவல் பெயர்கள், தலைப்புகள், உள்ளமைந்த பெயர்கள் எப்போதும் ஆங்கிலத்தில் இருக்கும்; தளம் அவற்றைப் பக்க மொழியில் காட்டும்.
 - **பல வகுப்புகள்**: மேலே உள்ள பட்டியலில் வகுப்புகளை மாற்றலாம், புதிய வகுப்பைத் தொடங்கலாம், அல்லது **Excel ஏற்றுமதி** மூலம் மாணவர்கள், புள்ளி வகைகள், தேதி வாரியான புள்ளிகள், வாசிப்பு ஆகிய தாள்களுடன் ஒரு கோப்பைப் பெறலாம். இது முழுக் காப்புப்பிரதியும் கூட: நிர்வாகப் பக்கத்தில் **இறக்குமதி** மூலம் மீட்டெடுக்கலாம்.
 - **மேசை அமைப்பு**: வெற்றுத் தரையில் தனி மேசைகளையோ 4 அல்லது 6 பேர் குழுக்களையோ வைக்கலாம். இழுக்கலாம், பெட்டியால் தேர்ந்தெடுக்கலாம், நகலெடுக்கலாம் (Ctrl+D), நீக்கலாம், அல்லது முழு வரிசைகளையும் ஒரே நேரத்தில் உருவாக்கலாம். மேசைகளைத் தேர்ந்தெடுத்துக் குழுவாக்கலாம்; குழுப் பெயரை இருமுறை அழுத்திப் பெயர் மாற்றலாம்.
 - **வகுப்புப் பட்டியல் இறக்குமதி**: உரையை ஒட்டலாம், அல்லது `.txt`, `.csv`, `.xlsx` கோப்பைத் தேர்ந்தெடுக்கலாம், ஒரு வரிக்கு ஒரு மாணவர். பாலினத்தைக் காற்புள்ளி அல்லது Tab-க்குப் பின் எழுதலாம் (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` போன்றவை).

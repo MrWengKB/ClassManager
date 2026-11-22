@@ -4,20 +4,20 @@
  *   Points by date 每日加分 / About 说明                           → for reading only
  *   _data (hidden)  the whole class as JSON, for everything the tabs don't hold (layout, seats, logs…)
  * Reading a workbook starts from _data and then applies what the editable tabs say.
- * Tab names and headers are fixed (English + 中文) so the language setting never matters.
+ * Tab names, headers and built-in names are always in English; the site shows them in the page language.
  */
 (function () {
   const { t } = window.I18n;
-  const TAB = { about: 'About 说明', students: 'Students 学生', items: 'Items 加分项目', roles: 'Roles 职务', reading: 'Reading 阅读', daily: 'Points by date 每日加分', data: '_data' };
+  const en = (k, v) => window.I18n.tIn('en', k, v);
+  const TAB = { about: 'About', students: 'Students', items: 'Items', roles: 'Roles', reading: 'Reading', daily: 'Points by date', data: '_data' };
   const CHUNK = 30000;
   const ABOUT = [
     ['Class Manager'],
     ['You can edit the tabs Students, Items, Roles and Reading here. Class Manager reads the changes the next time it opens the class.'],
-    ['可以直接在「学生」「加分项目」「职务」「阅读」分页修改，Class Manager 下次打开这个班级时会读入。'],
-    ['• Add a row = add (leave ID empty). Delete a row = remove. 新增一行就是新增（ID 留空），删除一行就是删除。'],
-    ['• Gender 性别: M / F. Roles 职务: names separated by commas 用逗号隔开. Group item 小组项目: Y / N.'],
-    ['• Columns marked (read only) and the other tabs are not read back. 标有 (read only) 的栏和其他分页不会读回。'],
-    ['• Do not edit or delete the hidden tab _data. 请不要修改或删除隐藏的 _data 分页。']
+    ['• Add a row to add (leave ID empty). Delete a row to remove.'],
+    ['• Gender: M / F. Roles: names separated by commas. Group item: Y / N.'],
+    ['• Columns marked (read only) and the other tabs are not read back.'],
+    ['• Do not edit or delete the hidden tab _data.']
   ];
 
   // SheetJS is bundled in js/vendor (works offline); the CDN is only a fallback.
@@ -36,9 +36,12 @@
     return loading;
   }
 
-  const roleName = r => r.name || (r.key ? t('role_' + r.key) : '?');
-  const itemName = it => window.Points.itemName(it, t);
-  const groupName = (g, st) => g.name || t('groupN', { n: st.groups.indexOf(g) + 1 });
+  // names as written in the sheet: built-in ones in English
+  const roleName = r => r.name || (r.key ? en('role_' + r.key) : '?');
+  const itemName = it => window.Points.itemName(it, en);
+  const groupName = (g, st) => g.name || en('groupN', { n: st.groups.indexOf(g) + 1 });
+  // a built-in name typed in English or in the page language counts as unchanged
+  const builtIn = (key, v) => !!key && (v === en(key) || v === t(key));
   const uid = p => p + '_' + Math.random().toString(36).slice(2, 9);
 
   /* ---------- class → workbook ---------- */
@@ -50,23 +53,23 @@
     const wk = R.weekStart();
     const tabs = [];
     tabs.push([TAB.about, [[st.title || ''], ...ABOUT], [110]]);
-    tabs.push([TAB.students, [['ID', 'Name 姓名', 'Gender 性别', 'Roles 职务', 'Group 小组 (read only)', 'Points 分数 (read only)', 'Books 阅读本数 (read only)']]
+    tabs.push([TAB.students, [['ID', 'Name', 'Gender', 'Roles', 'Group (read only)', 'Points (read only)', 'Books read (read only)']]
       .concat(st.students.map(s => [s.id, s.name, s.gender || '', (s.roles || []).map(id => roles.get(id)).filter(Boolean).map(roleName).join(', '),
         gname(seatGroup.get(s.id)), P.total(st, s.id), R.total(st, s.id)])), [12, 18, 10, 20, 14, 12, 12]]);
     const stats = new Map(P.itemStats(st).map(x => [x.item.id, x]));
-    tabs.push([TAB.items, [['ID', 'Icon 图标', 'Name 名称', 'Points 分值', 'Group item 小组项目 (Y/N)', 'Times 次数 (read only)', 'Total 总分 (read only)']]
+    tabs.push([TAB.items, [['ID', 'Icon', 'Name', 'Points', 'Group item (Y/N)', 'Times (read only)', 'Total (read only)']]
       .concat(st.pointItems.map(it => { const x = stats.get(it.id) || { count: 0, points: 0 }; return [it.id, it.icon, itemName(it), it.points, it.group ? 'Y' : 'N', x.count, x.points]; })), [14, 8, 20, 10, 12, 10, 10]]);
-    tabs.push([TAB.roles, [['ID', 'Name 名称']].concat(st.roles.map(r => [r.id, roleName(r)])), [14, 20]]);
-    tabs.push([TAB.reading, [['ID', 'Name 姓名 (read only)', 'Rounds 轮数', 'This round 本轮 (0-' + (R.RB - 1) + ')', 'Total books 总本数 (read only)', 'This week 本周 (read only)']]
+    tabs.push([TAB.roles, [['ID', 'Name']].concat(st.roles.map(r => [r.id, roleName(r)])), [14, 20]]);
+    tabs.push([TAB.reading, [['ID', 'Name (read only)', 'Rounds', 'This round (0-' + (R.RB - 1) + ')', 'Total books (read only)', 'This week (read only)']]
       .concat(st.students.map(s => { const r = R.get(st, s.id); return [s.id, s.name, r.rounds, r.progress, R.total(st, s.id), R.since(st, s.id, wk)]; })), [12, 18, 10, 14, 14, 14]]);
     const byId = new Map(st.students.map(s => [s.id, s]));
-    const daily = [['Date 日期', 'Name 姓名', 'Item 项目', 'Times 次数', 'Points 分数']];
+    const daily = [['Date', 'Name', 'Item', 'Times', 'Points']];
     P.days(st).forEach(d => Object.keys(st.pointDays[d]).forEach(sid => Object.keys(st.pointDays[d][sid]).forEach(iid => {
       const it = st.pointItems.find(x => x.id === iid), v = st.pointDays[d][sid][iid];
       if (it && byId.has(sid)) daily.push([d, byId.get(sid).name, itemName(it), v[0], v[1]]);
     })));
     tabs.push([TAB.daily, daily, [12, 18, 20, 10, 10]]);
-    const json = JSON.stringify(st), data = [['classmanager', 'Do not edit 请勿修改']];
+    const json = JSON.stringify(st), data = [['classmanager', 'Do not edit']];
     for (let i = 0; i < json.length; i += CHUNK) data.push([json.slice(i, i + CHUNK)]);
     tabs.push([TAB.data, data]);
 
@@ -81,7 +84,9 @@
   }
 
   /* ---------- workbook → class ---------- */
-  const rowsOf = (XLSX, wb, name) => wb.Sheets[name] ? XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: true, defval: '' }).slice(1) : null;
+  // a tab by its English name (older sheets had “English 中文” names)
+  const tabOf = (wb, name) => wb.Sheets[name] || wb.Sheets[wb.SheetNames.find(n => n.split(' ')[0] === name.split(' ')[0] && n.startsWith(name)) || ''];
+  const rowsOf = (XLSX, wb, name) => tabOf(wb, name) ? XLSX.utils.sheet_to_json(tabOf(wb, name), { header: 1, raw: true, defval: '' }).slice(1) : null;
   const str = v => String(v === null || v === undefined ? '' : v).trim();
   const int = (v, d) => { const n = parseInt(v, 10); return Number.isFinite(n) ? n : d; };
   function gender(v) {
@@ -104,11 +109,11 @@
       st.roles = roleRows.filter(r => str(r[1])).map(r => {
         const o = old.get(str(r[0]));
         if (!o) return { id: uid('r'), key: '', name: str(r[1]) };
-        return Object.assign({}, o, { name: str(r[1]) === roleName(Object.assign({}, o, { name: '' })) ? '' : str(r[1]) });
+        return Object.assign({}, o, { name: o.key && builtIn('role_' + o.key, str(r[1])) ? '' : str(r[1]) });
       });
     }
     const roleIds = new Map();
-    st.roles.forEach(r => { roleIds.set(roleName(r).toLowerCase(), r.id); if (r.name) roleIds.set(r.name.toLowerCase(), r.id); });
+    st.roles.forEach(r => { roleIds.set(roleName(r).toLowerCase(), r.id); if (r.key) roleIds.set(t('role_' + r.key).toLowerCase(), r.id); });
 
     const stuRows = rowsOf(XLSX, wb, TAB.students);
     if (stuRows) {
@@ -126,7 +131,7 @@
       st.pointItems = itemRows.filter(r => str(r[2])).map(r => {
         const o = old.get(str(r[0])) || { id: uid('p'), key: '', name: '' };
         const name = str(r[2]);
-        return Object.assign({}, o, { icon: str(r[1]) || '⭐', name: o.key && name === itemName(Object.assign({}, o, { name: '' })) ? '' : name, points: int(r[3], 1), group: yes(r[4]) });
+        return Object.assign({}, o, { icon: str(r[1]) || '⭐', name: o.key && builtIn('pt_' + o.key, name) ? '' : name, points: int(r[3], 1), group: yes(r[4]) });
       });
     }
 

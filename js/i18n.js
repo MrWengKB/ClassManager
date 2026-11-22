@@ -321,5 +321,12 @@
   }
   setLang(lang);
 
-  window.I18n = { t, setLang, LANGS, get lang() { return lang; } };
+  // the text in one given language, whatever the page language is
+  function tIn(l, key, vars) {
+    const row = S[key];
+    let s = row ? (row[ORDER.indexOf(l)] || row[0]) : key;
+    if (vars) s = s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] !== undefined ? vars[k] : m));
+    return s;
+  }
+  window.I18n = { t, tIn, setLang, LANGS, get lang() { return lang; } };
 })();
