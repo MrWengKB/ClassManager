@@ -18,7 +18,7 @@ Class Manager 是给老师用的班级管理网页：摆放座位、导入名单
 ### 功能
 
 - **Google 登录与云端保存**：每个班级是 Drive 里「Class Manager」文件夹中的一个文件。网站只申请 `drive.file` 权限，只能看到它自己建立的文件。每次修改约一秒后自动保存；如果同一个班级在别的分页或电脑上改过，会先载入较新的版本，不会互相覆盖。
-- **多个班级**：顶部下拉菜单切换班级，可以新建班级，也可以打开 `.cm.json` 文件。
+- **多个班级**：顶部下拉菜单切换班级，可以新建班级，也可以「导出 JSON」备份成 `.cm.json` 文件，再用「导入 JSON」打开。
 - **座位布局**：在空白地面上摆放单人桌或 4 人、6 人小组，可以拖动、框选、复制（Ctrl+D）、删除，也能一键生成整排座位。选中几张桌子就能组成小组，双击小组名称可以改名。
 - **导入名单**：粘贴文字，或选择 `.txt`、`.csv`、`.xlsx` 文件，一行一位学生。性别可写在逗号或 Tab 后面（`M/F`、`男/女`、`L/P`、`ஆண்/பெண்` 等）。
 - **排座位**：随机分配，或男女平衡分配。可以设定条件，比如「A 不能坐在 B 旁边」「A 和 B 不能同组」。也可以手动拖放安排。
@@ -53,7 +53,7 @@ Class Manager is a classroom management website for teachers. Lay out the desks,
 ### Features
 
 - **Google sign-in and cloud saving**: each class is one file in a `Class Manager` folder in the teacher's Drive. The site asks only for the `drive.file` permission, so it sees only the files it created. Changes are saved about a second after each edit. If the same class was changed in another tab or on another computer, the newer version is loaded first, so nothing is overwritten.
-- **Multiple classes**: switch classes from the menu at the top, start a new class, or open a `.cm.json` file.
+- **Multiple classes**: switch classes from the menu at the top, start a new class, or use **Export JSON** to back up a class as a `.cm.json` file and **Import JSON** to open one.
 - **Desk layout**: place single desks or groups of 4 or 6 on an empty floor. Drag, box-select, duplicate (Ctrl+D) and delete them, or generate whole rows at once. Select desks to make a group, and double-click a group name to rename it.
 - **Class list import**: paste text or choose a `.txt`, `.csv` or `.xlsx` file, one student per line. Gender can go after a comma or tab (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` and so on).
 - **Seating**: assign seats randomly or balance boys and girls. Add conditions such as "A must not sit next to B" or "A and B must not be in the same group". You can also arrange seats by hand with drag and drop.
@@ -88,7 +88,7 @@ Class Manager ialah laman web pengurusan kelas untuk guru. Susun meja, import se
 ### Ciri-ciri
 
 - **Log masuk Google dan simpanan awan**: setiap kelas ialah satu fail dalam folder `Class Manager` di Drive guru. Laman ini hanya meminta kebenaran `drive.file`, jadi ia hanya nampak fail yang dibuatnya sendiri. Perubahan disimpan kira-kira sesaat selepas setiap suntingan. Jika kelas yang sama diubah di tab atau komputer lain, versi yang lebih baru dimuatkan dahulu supaya tiada yang ditimpa.
-- **Beberapa kelas**: tukar kelas melalui menu di bahagian atas, mulakan kelas baru, atau buka fail `.cm.json`.
+- **Beberapa kelas**: tukar kelas melalui menu di bahagian atas, mulakan kelas baru, atau guna **Eksport JSON** untuk menyandarkan kelas sebagai fail `.cm.json` dan **Import JSON** untuk membukanya.
 - **Susun atur meja**: letak meja seorang atau kumpulan 4 atau 6 di atas lantai kosong. Seret, pilih dengan kotak, salin (Ctrl+D) dan padam, atau jana sebaris penuh sekali gus. Pilih beberapa meja untuk membentuk kumpulan, dan klik dua kali nama kumpulan untuk menukar nama.
 - **Import senarai kelas**: tampal teks atau pilih fail `.txt`, `.csv` atau `.xlsx`, seorang murid setiap baris. Jantina boleh ditulis selepas koma atau tab (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` dan sebagainya).
 - **Tempat duduk**: agihkan secara rawak atau seimbangkan lelaki dan perempuan. Tambah syarat seperti "A tidak boleh duduk sebelah B" atau "A dan B tidak boleh sekumpulan". Anda juga boleh menyusun sendiri dengan seret dan lepas.
@@ -123,7 +123,7 @@ Class Manager என்பது ஆசிரியர்களுக்கா�
 ### அம்சங்கள்
 
 - **Google உள்நுழைவும் மேகக்கணிச் சேமிப்பும்**: ஒவ்வொரு வகுப்பும் ஆசிரியரின் Drive-இல் உள்ள `Class Manager` கோப்புறையில் ஒரு கோப்பாகச் சேமிக்கப்படும். இந்தத் தளம் `drive.file` அனுமதியை மட்டுமே கேட்கும், எனவே தான் உருவாக்கிய கோப்புகளை மட்டுமே பார்க்கும். ஒவ்வொரு திருத்தத்துக்கும் சுமார் ஒரு வினாடிக்குப் பிறகு தானாகச் சேமிக்கப்படும். அதே வகுப்பு வேறு தாவலில் அல்லது கணினியில் மாற்றப்பட்டிருந்தால், புதிய பதிப்பு முதலில் ஏற்றப்படும், எதுவும் மேலெழுதப்படாது.
-- **பல வகுப்புகள்**: மேலே உள்ள பட்டியலில் வகுப்புகளை மாற்றலாம், புதிய வகுப்பைத் தொடங்கலாம், அல்லது `.cm.json` கோப்பைத் திறக்கலாம்.
+- **பல வகுப்புகள்**: மேலே உள்ள பட்டியலில் வகுப்புகளை மாற்றலாம், புதிய வகுப்பைத் தொடங்கலாம், அல்லது **JSON ஏற்றுமதி** மூலம் வகுப்பை `.cm.json` கோப்பாகக் காப்புப்பிரதி எடுத்து, **JSON இறக்குமதி** மூலம் திறக்கலாம்.
 - **மேசை அமைப்பு**: வெற்றுத் தரையில் தனி மேசைகளையோ 4 அல்லது 6 பேர் குழுக்களையோ வைக்கலாம். இழுக்கலாம், பெட்டியால் தேர்ந்தெடுக்கலாம், நகலெடுக்கலாம் (Ctrl+D), நீக்கலாம், அல்லது முழு வரிசைகளையும் ஒரே நேரத்தில் உருவாக்கலாம். மேசைகளைத் தேர்ந்தெடுத்துக் குழுவாக்கலாம்; குழுப் பெயரை இருமுறை அழுத்திப் பெயர் மாற்றலாம்.
 - **வகுப்புப் பட்டியல் இறக்குமதி**: உரையை ஒட்டலாம், அல்லது `.txt`, `.csv`, `.xlsx` கோப்பைத் தேர்ந்தெடுக்கலாம், ஒரு வரிக்கு ஒரு மாணவர். பாலினத்தைக் காற்புள்ளி அல்லது Tab-க்குப் பின் எழுதலாம் (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` போன்றவை).
 - **இருக்கை ஒதுக்கீடு**: சீரற்ற முறையில் ஒதுக்கலாம், அல்லது மாணவர், மாணவிகளைச் சமநிலைப்படுத்தலாம். "A, B-க்கு அருகில் அமரக்கூடாது", "A-யும் B-யும் ஒரே குழுவில் இருக்கக்கூடாது" போன்ற நிபந்தனைகளைச் சேர்க்கலாம். இழுத்து விடுவதன் மூலம் நீங்களே அமைக்கவும் முடியும்.
