@@ -185,5 +185,5 @@
   // re-translate an open modal when the language changes
   function relang() { if (wrap.hidden) return; if (mode === 'timer') paintTimer(); else if (mode === 'draw' && !D.anim) paintDraw(); }
 
-  window.ClassTools = { init, relang };
+  window.ClassTools = { init, relang, draw, openTimer };
 })();

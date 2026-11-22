@@ -34,6 +34,7 @@
       return Array.from({ length: R.RB }, (_, i) =>
         `<button class="rbk${i < p ? ' on' : ''}${anim === s.id + ':' + i ? ' pop' : ''}" data-s="${esc(s.id)}" data-i="${i}" title="${esc(i < p ? t('bookUntick') : t('bookTick'))}" aria-label="${esc(s.name)} ${i + 1}">📖</button>`).join('');
     };
+    if (window.Mobile.on) { renderMobile(st, sts, books); return; }
     const rows = !sts.length ? `<p class="hint">${t('noStudentsRead')}</p>` : sts.map(s => `<div class="rrow">
         <div class="rname"><span class="rav${s.gender ? ' g' + s.gender : ''}">${esc(s.name.charAt(0))}</span><strong>${esc(s.name)}</strong></div>
         <div class="rbooks">${books(s)}</div>
@@ -59,6 +60,34 @@
         `<ol class="rrank">${rank.map((r, i) => `<li><span class="medal">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1)}</span>
           <b>${esc(r.s.name)}</b><span class="spacer"></span><span class="muted">${esc(t('rankLine', { w: r.week, t: r.total }))}</span></li>`).join('')}</ol>`}</div>`;
   }
+
+  /* ---------- mobile: one line per student, + logs a book, tap the name for progress ---------- */
+  let openSid = null;
+  function renderMobile(st, sts, books) {
+    $('#readSide').innerHTML = '';
+    const wk = R.weekStart();
+    $('#readMain').innerHTML = !sts.length ? `<div class="rcard"><p class="hint">${t('noStudentsRead')}</p></div>` :
+      `<div class="rcard"><h2>📚 ${t('readTitle')}</h2><p class="hint small">${esc(t('mReadHint', { n: R.RB }))}</p><ul class="mlist mread">${sts.map(s => {
+        const r = R.get(st, s.id), open = openSid === s.id;
+        return `<li class="${open ? 'open' : ''}"><div class="mrow"><button class="mname-btn" data-mopen="${esc(s.id)}"><span class="rav${s.gender ? ' g' + s.gender : ''}">${esc(s.name.charAt(0))}</span><span class="mname">${esc(s.name)}</span>
+          <span class="muted small">🏅${r.rounds} · ${r.progress}/${R.RB}</span></button><button class="mplus" data-plus="${esc(s.id)}" aria-label="${esc(t('bookTick'))}">+</button></div>
+          ${open ? `<div class="mdetail"><div class="rbooks">${books(s)}</div><p class="muted small">${esc(t('mReadLine', { r: r.rounds, w: R.since(st, s.id, wk), t: R.total(st, s.id) }))}</p></div>` : ''}</li>`;
+      }).join('')}</ul></div>`;
+    anim = null;
+  }
+  $('#readMain').addEventListener('click', e => {
+    const o = e.target.closest('[data-mopen]');
+    if (o) { openSid = openSid === o.dataset.mopen ? null : o.dataset.mopen; renderMain(); return; }
+    const p = e.target.closest('[data-plus]');
+    if (!p) return;
+    const sid = p.dataset.plus;
+    anim = sid + ':' + R.get(Store.state, sid).progress;
+    const res = Live.change({ type: 'read', s: sid, d: 1, date: R.today() });
+    const s = Store.state.students.find(x => x.id === sid);
+    if (res && res.roundDone) toast(t('roundDone', { name: s ? s.name : '' }));
+    else if (s) toast(`📖 ${s.name} +1`);
+  });
+  window.Mobile.subscribe(() => renderMain());
 
   function renderAll() { renderHeader(); renderMain(); }
 

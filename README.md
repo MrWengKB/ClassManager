@@ -30,6 +30,7 @@ Class Manager 是给老师用的班级管理网页：摆放座位、导入名单
 - **阅读打卡**：使用同一份名单。点书本打卡，满 10 本算 1 轮。有本周、本月阅读统计和阅读榜。阅读记录单独统计，不计入积分。
 - **打印**：把整个教室排在一张横向的纸上。
 - **离线使用**：管理页右上角可以下载整个网站的 zip，解压后打开 `index.html` 即可。
+- **手机版**：手机屏幕会自动显示简化版：学生和小组列表（点名字加分）、幸运抽选；阅读打卡每人一个「+」按钮。浏览器选「桌面版网站」就显示完整版。
 - **四种界面语言**：页面右上角可以切换华文、English、Melayu、தமிழ்。
 
 ### 部署
@@ -64,6 +65,7 @@ Class Manager is a classroom management website for teachers. Lay out the desks,
 - **Reading log**: uses the same class list. Tap a book to log it, and 10 books make 1 round. Includes weekly and monthly stats and a reading ranking. Reading is tracked separately and does not count towards points.
 - **Printing**: fits the whole classroom onto one landscape page.
 - **Offline use**: download the whole site as a zip from the top right of the Manage page, unzip it and open `index.html`.
+- **Mobile version**: phones get a simpler layout: student and group lists (tap a name to give points) and the lucky draw; on the reading log each student has a + button. Choose "Desktop site" in the browser to see the full version.
 - **Four interface languages**: switch at the top right between 华文, English, Melayu and தமிழ்.
 
 ### Setup
@@ -98,6 +100,7 @@ Class Manager ialah laman web pengurusan kelas untuk guru. Susun meja, import se
 - **Rekod bacaan**: menggunakan senarai kelas yang sama. Tekan buku untuk merekod, dan 10 buku = 1 pusingan. Ada statistik mingguan dan bulanan serta kedudukan bacaan. Bacaan dikira berasingan dan tidak termasuk dalam mata.
 - **Cetak**: memuatkan seluruh kelas pada satu halaman melintang.
 - **Guna luar talian**: muat turun seluruh laman sebagai zip dari bahagian atas kanan halaman Urus, nyahzip dan buka `index.html`.
+- **Versi telefon**: telefon memaparkan susun atur ringkas: senarai murid dan kumpulan (tekan nama untuk memberi mata) dan cabutan bertuah; di rekod bacaan setiap murid ada butang +. Pilih "Laman desktop" dalam pelayar untuk versi penuh.
 - **Empat bahasa paparan**: tukar di bahagian atas kanan antara 华文, English, Melayu dan தமிழ்.
 
 ### Pemasangan
@@ -132,6 +135,7 @@ Class Manager என்பது ஆசிரியர்களுக்கா�
 - **வாசிப்புப் பதிவு**: அதே வகுப்புப் பட்டியலைப் பயன்படுத்தும். புத்தகத்தை அழுத்திப் பதிவு செய்யலாம். 10 புத்தகங்கள் = 1 சுற்று. வாராந்திர, மாதாந்திரப் புள்ளிவிவரங்களும் வாசிப்புத் தரவரிசையும் உண்டு. வாசிப்பு தனியாகக் கணக்கிடப்படும், புள்ளிகளில் சேராது.
 - **அச்சிடுதல்**: முழு வகுப்பறையையும் ஒரு கிடைமட்டப் பக்கத்தில் அடக்கும்.
 - **இணையம் இல்லாமல் பயன்படுத்துதல்**: நிர்வாகப் பக்கத்தின் மேல் வலப்பக்கத்திலிருந்து முழுத் தளத்தையும் zip ஆகப் பதிவிறக்கி, பிரித்தெடுத்து `index.html`-ஐத் திறக்கலாம்.
+- **கைபேசிப் பதிப்பு**: கைபேசியில் எளிய அமைப்பு தானாகக் காட்டப்படும்: மாணவர், குழுப் பட்டியல்கள் (புள்ளி வழங்கப் பெயரைத் தட்டவும்), அதிர்ஷ்டத் தேர்வு; வாசிப்புப் பதிவில் ஒவ்வொரு மாணவருக்கும் + பொத்தான். முழுப் பதிப்புக்கு உலாவியில் "Desktop site" தேர்வு செய்யவும்.
 - **நான்கு இடைமுக மொழிகள்**: மேல் வலப்பக்கத்தில் 华文, English, Melayu, தமிழ் ஆகியவற்றுக்கு இடையே மாற்றலாம்.
 
 ### அமைப்பு

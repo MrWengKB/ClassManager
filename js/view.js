@@ -253,10 +253,69 @@
   $('#side').addEventListener('change', e => { if (e.target.id === 'lbFilter') { lbItem = e.target.value; renderSide(); } });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopover(); });
 
+  /* ---------- mobile: student and group lists instead of the seating plan ---------- */
+  let mTab = 'students';
+  function renderMobile() {
+    const el = $('#mobileMain');
+    if (!window.Mobile.on) { el.innerHTML = ''; return; }
+    const st = Store.state, P = window.Points;
+    if (Live.needSignIn()) {
+      el.innerHTML = `<div class="mcard"><b>${t('viewSignIn')}</b><p class="hint">${t('aboutApp')}</p><a class="navbtn primary" href="login.html?next=index.html">${t('accSignInTitle')}</a></div>`;
+      return;
+    }
+    if (Live.loading) { el.innerHTML = `<div class="mcard"><p class="hint">${t('syncLoading')}</p></div>`; return; }
+    if (!st.students.length) { el.innerHTML = `<div class="mcard"><b>${t('viewEmpty')}</b><p class="hint">${t('viewEmptyHint')}</p></div>`; return; }
+    const tot = P.totals(st);
+    let h = `<div class="mdraw">${[['all', '🎲', 'drawAll'], ['M', '👦', 'drawBoys'], ['F', '👧', 'drawGirls']].map(([k, ic, lab]) =>
+      `<button class="fsbtn" data-fdraw="${k}">${ic} ${esc(t(lab))}</button>`).join('')}</div>`;
+    h += `<div class="mseg"><button class="${mTab === 'students' ? 'on' : ''}" data-mtab="students">👤 ${esc(t('mStudents'))} (${st.students.length})</button><button class="${mTab === 'groups' ? 'on' : ''}" data-mtab="groups">👥 ${esc(t('mGroups'))} (${st.groups.length})</button></div>`;
+    h += `<p class="hint small">${esc(t(mTab === 'students' ? 'mTapStudent' : 'mTapGroup'))}</p>`;
+    if (mTab === 'students') {
+      h += `<ul class="mlist">${st.students.map(s => `<li data-ms="${esc(s.id)}" class="${s.gender ? 'g' + s.gender : ''}"><span class="mname">${esc(s.name)}</span><b class="mscore${tot.get(s.id) < 0 ? ' neg' : ''}">${tot.get(s.id) || 0}</b></li>`).join('')}</ul>`;
+    } else if (!st.groups.length) {
+      h += `<p class="hint">${esc(t('mNoGroups'))}</p>`;
+    } else {
+      const byId = new Map(st.students.map(s => [s.id, s]));
+      h += `<ul class="mlist mgroups">${P.groupBoard(st).map(r => {
+        const names = P.groupMembers(st, r.group.id).map(id => byId.get(id)).filter(Boolean).map(s => esc(s.name)).join('、');
+        return `<li data-mg="${esc(r.group.id)}" style="--gc:${Layout.COLORS[r.group.color % Layout.COLORS.length]}"><div><span class="mname">${esc(Layout.groupName(r.group, st))}</span><div class="muted small">${names || '-'}</div></div><b class="mscore">${r.total}</b></li>`;
+      }).join('')}</ul>`;
+    }
+    const recent = st.pointLog.slice(-3).reverse();
+    if (recent.length) {
+      const items = new Map(st.pointItems.map(it => [it.id, it]));
+      const byId = new Map(st.students.map(s => [s.id, s]));
+      h += `<h3 class="mh">${t('recentTitle')}</h3><ul class="recent">${recent.map(e => {
+        const it = items.get(e.i), g = e.g && st.groups.find(x => x.id === e.g);
+        const who = e.g ? (g ? Layout.groupName(g, st) : t('forGroup')) + ' ×' + e.s.length : (byId.get(e.s) || {}).name || '?';
+        return `<li><span>${esc(it.icon)} ${esc(who)}</span><b class="${e.p < 0 ? 'neg' : 'pos'}">${e.p > 0 ? '+' : ''}${e.p}</b><span class="spacer"></span><button class="icon" data-undo="${esc(e.id)}" aria-label="${esc(t('undo'))}">↶</button></li>`;
+      }).join('')}</ul>`;
+    }
+    el.innerHTML = h;
+  }
+  $('#mobileMain').addEventListener('click', e => {
+    const d = e.target.closest('[data-fdraw]');
+    if (d) { ClassTools.draw(d.dataset.fdraw); return; }
+    const tb = e.target.closest('[data-mtab]');
+    if (tb) { mTab = tb.dataset.mtab; renderMobile(); return; }
+    const u = e.target.closest('[data-undo]');
+    if (u) { undoAward(u.dataset.undo); return; }
+    const s = e.target.closest('[data-ms]');
+    if (s) { openPopover({ student: s.dataset.ms }, 0, 0); return; }
+    const g = e.target.closest('[data-mg]');
+    if (g) openPopover({ group: g.dataset.mg }, 0, 0);
+  });
+  // on a phone the award menu is a sheet at the bottom of the screen
+  function placePop(on) { (on ? document.body : $('.stage-wrap')).appendChild(pop); closePopover(); }
+  if (window.Mobile.on) placePop(true);
+  window.Mobile.subscribe(on => { placePop(on); renderAll(); if (!on) requestAnimationFrame(() => Layout.fit()); });
+
   function renderAll() {
     document.body.dataset.tab = 'view';
     ui.scores = window.Points.totals(Store.state);
     renderHeader();
+    renderMobile();
+    if (window.Mobile.on) return;
     Layout.render();
     renderSide();
     renderStats();
