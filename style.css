@@ -80,6 +80,7 @@ html:lang(zh) .brand b { letter-spacing: 2px; }
 .zipbtn:hover { border-color: var(--accent); color: var(--accent); }
 .tools { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
 
+.wip-banner { flex: none; background: #fff4d6; color: #8a5a00; border-bottom: 1px solid #f0c36d; text-align: center; font-weight: 600; font-size: 14px; padding: 6px 12px; }
 main { flex: 1; display: flex; min-height: 0; }
 
 /* side panel */
@@ -226,7 +227,7 @@ body.name-dragging, body.name-dragging * { cursor: grabbing !important; }
 @media print {
   @page { size: landscape; margin: 10mm; }
   body { overflow: visible; background: #fff; height: auto; }
-  .top, .panel, .zoom { display: none !important; }
+  .top, .panel, .zoom, .wip-banner { display: none !important; }
   main, .stage-wrap, .stage { display: block; overflow: visible; height: auto; background: #fff; }
   .print-title { display: block; font-size: 20px; margin: 0 0 8px; text-align: center; }
   .board { background: #fff !important; position: relative; }
