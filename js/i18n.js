@@ -213,6 +213,26 @@
     adminLink: ['Manage', '管理', 'Urus', 'நிர்வகி'],
     viewLink: ['View', '查看', 'Lihat', 'பார்'],
 
+    // Reading check-in (readingcheckin.html)
+    readTitle: ['Reading log', '阅读打卡', 'Rekod bacaan', 'வாசிப்புப் பதிவு'],
+    readHint: ['Tap a book to log it. {n} books = 1 round 🏅. Reading is tracked separately and does not count towards points.', '点击书本打卡，满 {n} 本 = 1 轮 🏅。阅读记录独立统计，不计入积分。', 'Tekan buku untuk merekod. {n} buku = 1 pusingan 🏅. Rekod bacaan dikira berasingan dan tidak termasuk dalam mata.', 'பதிவு செய்ய புத்தகத்தை அழுத்துங்கள். {n} புத்தகங்கள் = 1 சுற்று 🏅. வாசிப்பு தனியாகக் கணக்கிடப்படும், புள்ளிகளில் சேராது.'],
+    roundUnit: ['rounds', '轮', 'pusingan', 'சுற்றுகள்'],
+    bookTick: ['Tap to log', '点击打卡', 'Tekan untuk rekod', 'பதிவு செய்ய அழுத்துங்கள்'],
+    bookUntick: ['Tap to undo', '点击取消', 'Tekan untuk batal', 'ரத்து செய்ய அழுத்துங்கள்'],
+    roundDone: ['🎉 {name} finished a reading round!', '🎉 {name} 完成一轮阅读！', '🎉 {name} telah menamatkan satu pusingan bacaan!', '🎉 {name} ஒரு வாசிப்புச் சுற்றை முடித்தார்!'],
+    readStats: ['Class reading stats', '班级阅读统计', 'Statistik bacaan kelas', 'வகுப்பு வாசிப்புப் புள்ளிவிவரம்'],
+    stStudents: ['Students', '学生总数', 'Bilangan murid', 'மாணவர்கள்'],
+    stRounds: ['Rounds', '累计轮数', 'Jumlah pusingan', 'மொத்தச் சுற்றுகள்'],
+    stBooks: ['Books read', '总阅读量', 'Jumlah buku', 'வாசித்த புத்தகங்கள்'],
+    stAvg: ['Books per student', '人均阅读', 'Purata seorang', 'சராசரி'],
+    stWeek: ['This week', '本周阅读', 'Minggu ini', 'இந்த வாரம்'],
+    stMonth: ['This month', '本月阅读', 'Bulan ini', 'இந்த மாதம்'],
+    readRank: ['Reading leaderboard', '阅读榜', 'Papan pendahulu bacaan', 'வாசிப்புத் தரவரிசை'],
+    rankLine: ['This week {w} · Total {t} books', '本周 {w} 本 · 共 {t} 本', 'Minggu ini {w} · Jumlah {t} buku', 'இந்த வாரம் {w} · மொத்தம் {t} புத்தகங்கள்'],
+    noReadingYet: ['No reading logged yet.', '还没有阅读记录。', 'Belum ada rekod bacaan.', 'இன்னும் வாசிப்புப் பதிவுகள் இல்லை.'],
+    noStudentsRead: ['No class list yet. Add students in Manage → Class list.', '还没有名单，请到“管理 → 名单”里添加学生。', 'Belum ada senarai kelas. Tambah murid dalam Urus → Senarai kelas.', 'வகுப்புப் பட்டியல் இல்லை. நிர்வகி → பட்டியல் இல் மாணவர்களைச் சேர்க்கவும்.'],
+    viewLinkFull: ['Class view', '班级一览', 'Paparan kelas', 'வகுப்புப் பார்வை'],
+
     // Class view (index.html)
     viewSub: ['Class view', '班级一览', 'Paparan kelas', 'வகுப்புப் பார்வை'],
     viewEmpty: ['No classroom has been set up yet.', '还没有布置教室。', 'Kelas belum disediakan.', 'வகுப்பறை இன்னும் அமைக்கப்படவில்லை.'],

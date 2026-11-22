@@ -6,16 +6,7 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const ui = { tab: 'view', sel: new Set(), picked: null, zoom: 1 };
-  const Cloud = window.Cloud;
-  const cloud = { classes: [], id: null, updated: null, loading: Cloud.enabled };
-
-  function renderClassSel() {
-    const sel = $('#classSel');
-    sel.hidden = !Cloud.enabled || cloud.classes.length < 2;
-    sel.innerHTML = cloud.classes.map(c => `<option value="${esc(c.id)}">${esc(c.title || t('untitled'))}</option>`).join('');
-    if (cloud.id) sel.value = cloud.id;
-    sel.title = t('classSelect');
-  }
+  const Cloud = window.Cloud, Live = window.Live;
 
   function renderHeader() {
     const st = Store.state;
@@ -28,16 +19,17 @@
     $('#langSel').title = t('language');
     $('#btnPrint span').textContent = t('print');
     $('#lnkAdmin span').textContent = t('adminLink');
+    $('#lnkReading span').textContent = t('readTitle');
     $('#zoomOut').title = t('zoomOut'); $('#zoomIn').title = t('zoomIn'); $('#zoomFit').textContent = t('zoomFit');
     $('#zoomVal').textContent = Math.round(ui.zoom * 100) + '%';
     const needSignIn = Cloud.enabled && !window.Auth.current();
-    const empty = needSignIn || (!cloud.loading && !st.desks.length);
+    const empty = needSignIn || (!Live.loading && !st.desks.length);
     $('#emptyNote').hidden = !empty;
     $('#emptyNote b').textContent = needSignIn ? t('viewSignIn') : t('viewEmpty');
     $('#emptyNote p').textContent = needSignIn ? t('aboutApp') : t('viewEmptyHint');
     $('#emptySignIn').hidden = !needSignIn;
     $('#emptySignIn').textContent = t('accSignInTitle');
-    renderClassSel();
+    Live.renderClassSel();
   }
 
   function nameChip(s, roles) {
@@ -139,26 +131,16 @@
   function closePopover() { pop.hidden = true; popTarget = null; }
 
   function award(studentId, itemId) {
-    const d = { type: 'add', s: studentId, i: itemId, id: Store.uid('e'), at: new Date().toISOString() };
-    let entry = null;
-    Store.commit(st => { entry = window.Points.add(st, d.s, d.i, d.id, d.at); });
-    if (!entry) return;
-    flyScore(studentId, entry.p);
-    queue(d);
+    const entry = Live.change({ type: 'add', s: studentId, i: itemId, id: Store.uid('e'), at: new Date().toISOString() });
+    if (entry) flyScore(studentId, entry.p);
   }
   function awardGroup(groupId, itemId) {
     const members = window.Points.groupMembers(Store.state, groupId);
-    const d = { type: 'addGroup', g: groupId, members, i: itemId, id: Store.uid('e'), at: new Date().toISOString() };
-    let entry = null;
-    Store.commit(st => { entry = window.Points.addGroup(st, d.g, d.i, d.id, d.at, d.members); });
-    if (!entry) return;
-    entry.s.forEach(sid => flyScore(sid, entry.p));
-    queue(d);
+    const entry = Live.change({ type: 'addGroup', g: groupId, members, i: itemId, id: Store.uid('e'), at: new Date().toISOString() });
+    if (entry) entry.s.forEach(sid => flyScore(sid, entry.p));
   }
   function undoAward(entryId) {
-    let ok = false;
-    Store.commit(st => { ok = window.Points.undo(st, entryId); });
-    if (ok) queue({ type: 'undo', id: entryId });
+    Live.change({ type: 'undo', id: entryId });
   }
   // a small "+1" that floats up from the desk
   function flyScore(studentId, p) {
@@ -171,45 +153,6 @@
     el.appendChild(f);
     setTimeout(() => f.remove(), 1200);
   }
-
-  /* ---------- saving points to Google Drive ----------
-   * Each award is kept as a small change until Drive has it. If the class was changed somewhere
-   * else in the meantime, the newer copy is loaded and the changes are replayed onto it. */
-  const pending = [];
-  let saving = false;
-  function queue(d) {
-    if (!Cloud.enabled || !cloud.id) return;
-    pending.push(d);
-    setTimeout(pushPending, 400);
-  }
-  async function pushPending() {
-    if (saving || !pending.length || !cloud.id) return;
-    saving = true;
-    const id = cloud.id;
-    try {
-      for (let tries = 0; tries < 4 && pending.length; tries++) {
-        const n = pending.length;
-        try {
-          const res = await Cloud.api('save', { id, state: Store.state, version: cloud.version });
-          cloud.version = res.version; cloud.updated = res.updated;
-          pending.splice(0, n);
-        } catch (e) {
-          if (e.code !== 'conflict' || !e.data) throw e;
-          const rec = e.data.record;
-          const merged = Store.normalize(rec.state);
-          pending.forEach(d => window.Points.apply(merged, d));
-          cloud.version = rec.version; cloud.updated = rec.updated;
-          Store.load(merged, false);
-        }
-      }
-    } catch (e) {
-      setTimeout(pushPending, 15000); // offline or signed out: try again later
-    } finally {
-      saving = false;
-    }
-    if (pending.length) setTimeout(pushPending, 400);
-  }
-  window.addEventListener('beforeunload', e => { if (pending.length) { e.preventDefault(); e.returnValue = ''; } });
 
   $('#board').addEventListener('click', e => {
     const label = e.target.closest('.glabel');
@@ -262,54 +205,11 @@
   });
   window.addEventListener('afterprint', () => { if (preZoom !== null) { ui.zoom = preZoom; preZoom = null; } renderAll(); });
 
-  // Changes made on the admin page in another tab show up here straight away.
-  if (!Cloud.enabled) window.addEventListener('storage', e => { if (e.key === 'classmanager:v1') location.reload(); });
-
-  /* ---------- Google Drive ---------- */
-  async function openClass(id, refit) {
-    const { record } = await Cloud.api('load', { id });
-    cloud.id = id; cloud.updated = record.updated; cloud.version = record.version;
-    pending.length = 0;
-    Cloud.rememberClassId(id);
-    Store.load(record.state, false);
-    cloud.loading = false;
-    renderAll();
-    if (refit) requestAnimationFrame(() => Layout.fit());
-  }
-  async function startCloud() {
-    if (!window.Auth.current()) { Store.load(Store.blank(), false); cloud.loading = false; renderAll(); return; }
-    try {
-      ({ classes: cloud.classes } = await Cloud.api('list'));
-      const want = Cloud.lastClassId();
-      const id = cloud.classes.some(c => c.id === want) ? want : (cloud.classes[0] || {}).id;
-      if (id) await openClass(id, true);
-      else { Store.load(Store.blank(), false); cloud.loading = false; renderAll(); }
-    } catch (e) { cloud.loading = false; renderAll(); }
-    // look for changes every 30 seconds
-    setInterval(async () => {
-      if (document.hidden || !window.Auth.token() || saving || pending.length) return;
-      try {
-        ({ classes: cloud.classes } = await Cloud.api('list'));
-        const c = cloud.classes.find(x => x.id === cloud.id);
-        if (c && c.updated !== cloud.updated) await openClass(cloud.id, false);
-        else renderClassSel();
-      } catch (e) { /* try again next time */ }
-    }, 30000);
-  }
-  $('#classSel').addEventListener('change', async e => {
-    if (pending.length) await pushPending();
-    openClass(e.target.value, true).catch(() => {});
-  });
-
   Layout.init({
     board: $('#board'), stage: $('#stage'), sizer: $('#sizer'), ui, readOnly: true,
     onSelectionChange: () => {}, onDeskClick: () => {}, onPick: () => {},
     onZoom: renderHeader
   });
   Store.subscribe(() => renderAll());
-  if (Cloud.enabled) { Store.load(Store.blank(), false); startCloud(); }
-  else {
-    renderAll();
-    requestAnimationFrame(() => { if (Store.state.desks.length) Layout.fit(); });
-  }
+  Live.start({ onOpen: refit => { renderAll(); if (refit) requestAnimationFrame(() => { if (Store.state.desks.length) Layout.fit(); }); } });
 })();

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LVJJ4GY9FC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-LVJJ4GY9FC');
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Class Manager</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-scroll reading-page">
+  <header class="top">
+    <a class="brand" href="index.html">
+      <img class="logo" src="favicon.svg" alt="" width="32" height="32">
+      <div><b id="brandName">Class Manager</b><small id="brandSub"></small></div>
+    </a>
+    <h1 id="classTitle" class="class-title view-title"></h1>
+    <select id="classSel" aria-label="Class" hidden></select>
+    <div class="tools">
+      <select id="langSel" aria-label="Language">
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+        <option value="ms">Bahasa Melayu</option>
+        <option value="ta">தமிழ்</option>
+      </select>
+      <a id="lnkView" class="navbtn" href="index.html">👁 <span></span></a>
+      <a id="lnkAdmin" class="navbtn primary" href="admin.html">⚙ <span></span></a>
+    </div>
+  </header>
+
+  <main class="reading-main">
+    <div id="readMain"></div>
+    <aside id="readSide"></aside>
+  </main>
+  <div id="toast" role="status"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/points.js"></script>
+  <script src="js/reading.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/readingpage.js"></script>
+</body>
+</html>
