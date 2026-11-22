@@ -1,12 +1,18 @@
 # Class Manager
 
-A classroom seating planner for teachers. Open `index.html` in a browser (or GitHub Pages); there is nothing to install. Everything is saved automatically in the browser, and **Save / Open** writes and reads a `.cm.json` file (older `.ppz.json` files from Seat Manager still open) so you can keep one file per class.
+A classroom seating planner for teachers. Open `index.html` in a browser (or GitHub Pages); there is nothing to install. Everything is saved automatically, and **Save / Open** writes and reads a `.cm.json` file (older `.ppz.json` files from Seat Manager still open) so you can keep one file per class.
 
 ## Pages
 
-- `index.html`: the class view. It shows the finished result of the four management steps (desks, groups, seats and roles) and can be printed. Anyone can open it.
+- `index.html`: the class view. It shows the finished result of the four management steps (desks, groups, seats and roles) and can be printed.
 - `admin.html`: the four management tabs (Layout, Class list, Seating, Roles). You need to sign in first.
-- `login.html`: create an account or sign in. For now, accounts are kept only in this browser: the password is stored as a salted PBKDF2 hash, never as plain text. This is not real protection yet, because there is no server.
+- `login.html`: Sign in with Google.
+
+## Google sign-in and Google Drive
+
+Each teacher signs in with their own Google account. Their classes are saved in **their own Google Drive**, one JSON file per class in a folder called `Class Manager`. The site asks only for the `drive.file` permission, so it can see the files it created and nothing else in the Drive. Changes are saved automatically about a second after each edit. If the same class was changed in another tab or on another computer in the meantime, the newer version on Drive is loaded instead of being overwritten.
+
+Settings are in `js/config.js`: the OAuth Client ID, and `useDrive` (set it to `false` to keep data only in the browser). The Google Cloud project needs the Google Drive API enabled, and `https://mrwengkb.github.io` as an authorized JavaScript origin.
 
 ## Features
 

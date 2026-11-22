@@ -1,69 +1,81 @@
-/* Class Manager · 账号（目前只保存在本浏览器里；密码用 PBKDF2 加盐哈希，不保存明文） */
+/* Class Manager · 用 Google 账号登录，并取得访问老师自己 Google Drive 的权限
+ * Scope drive.file: the site can only see the files it created itself, nothing else in the Drive.
+ * The access token lasts about an hour and is kept in this browser.
+ */
 (function () {
-  const USERS_KEY = 'classmanager:accounts';
-  const SESSION_KEY = 'classmanager:session';
-  const ITER = 150000;
+  const KEY = 'classmanager:google';
+  const GSI_SRC = 'https://accounts.google.com/gsi/client';
+  const SCOPES = 'openid email profile https://www.googleapis.com/auth/drive.file';
+  const cfg = window.CM_CONFIG || {};
 
-  function readUsers() {
-    try { const u = JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); return u && typeof u === 'object' ? u : {}; } catch (e) { return {}; }
+  function read() {
+    try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); return s && s.token ? s : null; } catch (e) { return null; }
   }
-  function writeUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
-  const hex = buf => Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
-  const unhex = s => new Uint8Array(s.match(/../g).map(h => parseInt(h, 16)));
-  const norm = name => String(name || '').trim();
-  const keyOf = name => norm(name).toLowerCase();
+  function write(s) { try { s ? localStorage.setItem(KEY, JSON.stringify(s)) : localStorage.removeItem(KEY); } catch (e) { /* ignore */ } }
 
-  function cryptoOk() { return !!(window.crypto && crypto.subtle && crypto.getRandomValues); }
-
-  async function hash(password, saltHex, iter) {
-    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: unhex(saltHex), iterations: iter }, base, 256);
-    return hex(bits);
+  // A valid access token, or null when signed out / expired.
+  function token() {
+    const s = read();
+    return s && s.exp > Date.now() + 60000 ? s.token : null;
   }
-
-  // Returns null on success, or an error code: 'nameEmpty' | 'nameTaken' | 'pwShort' | 'pwMismatch' | 'noCrypto'
-  async function createAccount(name, password, confirmPw) {
-    const n = norm(name);
-    if (!n) return 'nameEmpty';
-    if (!password || password.length < 6) return 'pwShort';
-    if (password !== confirmPw) return 'pwMismatch';
-    if (!cryptoOk()) return 'noCrypto';
-    const users = readUsers();
-    if (users[keyOf(n)]) return 'nameTaken';
-    const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
-    users[keyOf(n)] = { name: n, salt, iter: ITER, hash: await hash(password, salt, ITER), created: new Date().toISOString() };
-    writeUsers(users);
-    setSession(n);
-    return null;
-  }
-
-  // Returns null on success, or 'badLogin' | 'noCrypto'
-  async function signIn(name, password) {
-    if (!cryptoOk()) return 'noCrypto';
-    const u = readUsers()[keyOf(name)];
-    if (!u || !password) return 'badLogin';
-    if ((await hash(password, u.salt, u.iter)) !== u.hash) return 'badLogin';
-    setSession(u.name);
-    return null;
-  }
-
-  function setSession(name) { try { localStorage.setItem(SESSION_KEY, name); } catch (e) { /* ignore */ } }
+  // Who signed in last (kept after the token expires, so we can sign them back in quickly).
   function current() {
-    try {
-      const n = localStorage.getItem(SESSION_KEY);
-      return n && readUsers()[keyOf(n)] ? n : null;
-    } catch (e) { return null; }
+    const s = read();
+    return s ? { email: s.email, name: s.name || s.email } : null;
   }
-  function signOut() { try { localStorage.removeItem(SESSION_KEY); } catch (e) { /* ignore */ } }
-  function hasAccounts() { return Object.keys(readUsers()).length > 0; }
-
-  // Send the visitor to the sign-in page unless someone is signed in.
+  function signOut() {
+    const s = read();
+    write(null);
+    if (s && s.token && window.google && google.accounts && google.accounts.oauth2) google.accounts.oauth2.revoke(s.token, () => {});
+  }
   function requireLogin() {
-    if (current()) return true;
-    const page = location.pathname.split('/').pop() || 'admin.html';
-    location.replace('login.html?next=' + encodeURIComponent(page));
+    if (current()) return true; // an expired token is renewed when it is needed
+    location.replace(loginUrl());
     return false;
   }
+  function loginUrl() {
+    const page = location.pathname.split('/').pop() || 'index.html';
+    return 'login.html?next=' + encodeURIComponent(page);
+  }
 
-  window.Auth = { createAccount, signIn, signOut, current, hasAccounts, requireLogin, cryptoOk };
+  /* ---------- Google Identity Services (token model) ---------- */
+  let gsiPromise = null;
+  function loadGsi() {
+    if (!gsiPromise) {
+      gsiPromise = new Promise((resolve, reject) => {
+        if (window.google && google.accounts && google.accounts.oauth2) return resolve();
+        const s = document.createElement('script');
+        s.src = GSI_SRC; s.async = true;
+        s.onload = () => resolve();
+        s.onerror = () => { gsiPromise = null; reject(Object.assign(new Error('gsi'), { code: 'gsi' })); };
+        document.head.appendChild(s);
+      });
+    }
+    return gsiPromise;
+  }
+
+  // Must be called from a click: opens Google's sign-in popup (it closes by itself when nothing needs confirming).
+  async function signIn() {
+    await loadGsi();
+    const prev = current();
+    const resp = await new Promise((resolve, reject) => {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: cfg.googleClientId,
+        scope: SCOPES,
+        hint: prev ? prev.email : undefined,
+        callback: r => (r.error ? reject(Object.assign(new Error(r.error), { code: 'denied' })) : resolve(r)),
+        error_callback: e => reject(Object.assign(new Error(e && e.type || 'popup'), { code: 'popup' }))
+      });
+      client.requestAccessToken({ prompt: '' });
+    });
+    if (!google.accounts.oauth2.hasGrantedAllScopes(resp, 'https://www.googleapis.com/auth/drive.file')) {
+      throw Object.assign(new Error('scope'), { code: 'scope' });
+    }
+    const info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + resp.access_token } })
+      .then(r => r.json()).catch(() => ({}));
+    write({ token: resp.access_token, exp: Date.now() + (Number(resp.expires_in) || 3600) * 1000, email: info.email || '', name: info.name || '' });
+    return resp.access_token;
+  }
+
+  window.Auth = { token, current, signIn, signOut, requireLogin, loginUrl, loadGsi };
 })();

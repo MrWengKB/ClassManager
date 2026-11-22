@@ -6,6 +6,16 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const ui = { tab: 'view', sel: new Set(), picked: null, zoom: 1 };
+  const Cloud = window.Cloud;
+  const cloud = { classes: [], id: null, updated: null, loading: Cloud.enabled };
+
+  function renderClassSel() {
+    const sel = $('#classSel');
+    sel.hidden = !Cloud.enabled || cloud.classes.length < 2;
+    sel.innerHTML = cloud.classes.map(c => `<option value="${esc(c.id)}">${esc(c.title || t('untitled'))}</option>`).join('');
+    if (cloud.id) sel.value = cloud.id;
+    sel.title = t('classSelect');
+  }
 
   function renderHeader() {
     const st = Store.state;
@@ -20,10 +30,14 @@
     $('#lnkAdmin span').textContent = t('adminLink');
     $('#zoomOut').title = t('zoomOut'); $('#zoomIn').title = t('zoomIn'); $('#zoomFit').textContent = t('zoomFit');
     $('#zoomVal').textContent = Math.round(ui.zoom * 100) + '%';
-    const empty = !st.desks.length;
+    const needSignIn = Cloud.enabled && !window.Auth.current();
+    const empty = needSignIn || (!cloud.loading && !st.desks.length);
     $('#emptyNote').hidden = !empty;
-    $('#emptyNote b').textContent = t('viewEmpty');
-    $('#emptyNote p').textContent = t('viewEmptyHint');
+    $('#emptyNote b').textContent = needSignIn ? t('viewSignIn') : t('viewEmpty');
+    $('#emptyNote p').textContent = needSignIn ? '' : t('viewEmptyHint');
+    $('#emptySignIn').hidden = !needSignIn;
+    $('#emptySignIn').textContent = t('accSignInTitle');
+    renderClassSel();
   }
 
   function nameChip(s, roles) {
@@ -92,13 +106,48 @@
   window.addEventListener('afterprint', () => { if (preZoom !== null) { ui.zoom = preZoom; preZoom = null; } renderAll(); });
 
   // Changes made on the admin page in another tab show up here straight away.
-  window.addEventListener('storage', e => { if (e.key === 'classmanager:v1') location.reload(); });
+  if (!Cloud.enabled) window.addEventListener('storage', e => { if (e.key === 'classmanager:v1') location.reload(); });
+
+  /* ---------- Google Drive ---------- */
+  async function openClass(id, refit) {
+    const { record } = await Cloud.api('load', { id });
+    cloud.id = id; cloud.updated = record.updated;
+    Cloud.rememberClassId(id);
+    Store.load(record.state, false);
+    cloud.loading = false;
+    renderAll();
+    if (refit) requestAnimationFrame(() => Layout.fit());
+  }
+  async function startCloud() {
+    if (!window.Auth.current()) { Store.load(Store.blank(), false); cloud.loading = false; renderAll(); return; }
+    try {
+      ({ classes: cloud.classes } = await Cloud.api('list'));
+      const want = Cloud.lastClassId();
+      const id = cloud.classes.some(c => c.id === want) ? want : (cloud.classes[0] || {}).id;
+      if (id) await openClass(id, true);
+      else { Store.load(Store.blank(), false); cloud.loading = false; renderAll(); }
+    } catch (e) { cloud.loading = false; renderAll(); }
+    // look for changes every 30 seconds
+    setInterval(async () => {
+      if (document.hidden || !window.Auth.token()) return;
+      try {
+        ({ classes: cloud.classes } = await Cloud.api('list'));
+        const c = cloud.classes.find(x => x.id === cloud.id);
+        if (c && c.updated !== cloud.updated) await openClass(cloud.id, false);
+        else renderClassSel();
+      } catch (e) { /* try again next time */ }
+    }, 30000);
+  }
+  $('#classSel').addEventListener('change', e => openClass(e.target.value, true).catch(() => {}));
 
   Layout.init({
     board: $('#board'), stage: $('#stage'), sizer: $('#sizer'), ui, readOnly: true,
     onSelectionChange: () => {}, onDeskClick: () => {}, onPick: () => {},
     onZoom: renderHeader
   });
-  renderAll();
-  requestAnimationFrame(() => { if (Store.state.desks.length) Layout.fit(); });
+  if (Cloud.enabled) { Store.load(Store.blank(), false); renderAll(); startCloud(); }
+  else {
+    renderAll();
+    requestAnimationFrame(() => { if (Store.state.desks.length) Layout.fit(); });
+  }
 })();

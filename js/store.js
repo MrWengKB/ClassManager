@@ -94,6 +94,16 @@
     save(); emit();
   }
 
+  // Switch to another class's data (e.g. loaded from Google Drive): no undo across classes.
+  // persist=false: show it without touching this browser's saved copy (read-only pages).
+  function switchTo(next, persist) {
+    undoStack.length = 0;
+    redoStack.length = 0;
+    state = normalize(next);
+    if (persist !== false) save();
+    listeners.forEach(fn => fn(state, 'load'));
+  }
+
   let counter = 0;
   function uid(prefix) {
     counter = (counter + 1) % 1296;
@@ -102,7 +112,7 @@
 
   window.Store = {
     get state() { return state; },
-    commit, undo, redo, replace, uid, blank, normalize,
+    commit, undo, redo, replace, load: switchTo, uid, blank, normalize,
     canUndo: () => undoStack.length > 0,
     canRedo: () => redoStack.length > 0,
     subscribe: fn => listeners.push(fn)

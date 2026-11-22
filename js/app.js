@@ -60,7 +60,9 @@
     $('#lnkView span').textContent = t('viewLink');
     $('#lnkView').title = t('viewLink');
     $('#btnSignOut span').textContent = t('signOut');
-    $('#btnSignOut').title = t('signedInAs', { name: window.Auth.current() || '' });
+    const me = window.Auth.current();
+    $('#btnSignOut').title = t('signedInAs', { name: me ? me.email : '' });
+    if (window.Sync) window.Sync.render();
   }
 
   /* ---------- helpers ---------- */
@@ -454,9 +456,10 @@
   $('#btnUndo').addEventListener('click', () => Store.undo());
   $('#btnRedo').addEventListener('click', () => Store.redo());
   $('#btnNew').addEventListener('click', () => {
-    if (!confirm(t('confirmNew'))) return;
+    if (!window.Sync && !confirm(t('confirmNew'))) return;
     ui.sel = new Set(); ui.picked = null; ui.assignMsg = null; ui.importMsg = null;
-    Store.replace(Store.blank());
+    if (window.Sync) window.Sync.create().catch(() => {}); // a new class on Google Drive
+    else Store.replace(Store.blank());
   });
   $('#btnSave').addEventListener('click', () => {
     const st = Store.state;
@@ -478,6 +481,7 @@
       const data = JSON.parse(await f.text());
       if (!data || (data.app !== 'classmanager' && data.app !== 'paipaizuo')) throw new Error('bad');
       ui.sel = new Set(); ui.picked = null;
+      if (window.Sync) { window.Sync.create(data).catch(() => {}); return; } // opened file becomes a new class
       Store.replace(data);
       setTimeout(() => Layout.fit(), 0);
     } catch (err) { alert(t('fileError')); }
