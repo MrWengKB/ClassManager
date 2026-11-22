@@ -4,7 +4,6 @@
  * converts, and read by exporting it as .xlsx, so edits made in Google Sheets are read back.
  * The file's Drive "version" number goes up with every change, by this site or in Sheets;
  * it is used to notice when the class was changed somewhere else in the meantime.
- * Classes saved by older versions as JSON files are converted to Sheets once, automatically.
  */
 (function () {
   const cfg = window.CM_CONFIG || {};
@@ -32,7 +31,7 @@
     if (res.status === 401 && !retried) { await reauth(true); return request(method, url, opts, true); }
     if (res.status === 404) throw new CloudError('notFound');
     if (!res.ok) throw new CloudError(res.status === 403 ? 'forbidden' : 'server', await res.text().catch(() => ''));
-    return opts && opts.raw ? res.text() : opts && opts.bytes ? res.arrayBuffer() : res.json();
+    return opts && opts.bytes ? res.arrayBuffer() : res.json();
   }
   const q = s => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
 
@@ -96,7 +95,7 @@
   function lastClassId() { return store.get('classmanager:classId'); }
   function rememberClassId(id) { store.set('classmanager:classId', id); }
   const fileName = state => (String(state.title || '').trim() || t('untitled')).replace(/[\\/]/g, '_').slice(0, 100);
-  const titleOf = f => f.name.replace(/\.json$/i, '');
+  const titleOf = f => f.name;
   const meta = id => request('GET', `${API}/files/${encodeURIComponent(id)}?fields=id,name,mimeType,modifiedTime,version,appProperties`);
 
   /* ---------- actions ---------- */
@@ -110,31 +109,15 @@
       if (e.code === 'notFound') { store.set('classmanager:folder', null); return list(); }
       throw e;
     }
-    const files = res.files || [];
-    // older JSON classes: make a Google Sheet copy once, then leave the JSON file alone
-    const old = files.filter(f => f.mimeType !== SHEET_MIME);
-    for (const f of old) {
-      const content = JSON.parse(await request('GET', `${API}/files/${encodeURIComponent(f.id)}?alt=media`, { raw: true }));
-      const made = await create(content.state || content);
-      await request('PATCH', `${API}/files/${encodeURIComponent(f.id)}?fields=id`, {
-        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ appProperties: { app: 'classmanager-json', sheet: made.id } })
-      });
-      if (lastClassId() === f.id) rememberClassId(made.id);
-      f.id = made.id; f.mimeType = SHEET_MIME; f.modifiedTime = made.updated;
-    }
+    const files = (res.files || []).filter(f => f.mimeType === SHEET_MIME);
     return { classes: files.map(f => ({ id: f.id, title: titleOf(f), updated: f.modifiedTime })) };
   }
 
   async function load(id) {
     const m = await meta(id);
+    const buf = await request('GET', `${API}/files/${encodeURIComponent(id)}/export?mimeType=${encodeURIComponent(XLSX_MIME)}`, { bytes: true });
     let state;
-    if (m.mimeType === SHEET_MIME) {
-      const buf = await request('GET', `${API}/files/${encodeURIComponent(id)}/export?mimeType=${encodeURIComponent(XLSX_MIME)}`, { bytes: true });
-      try { state = await window.SheetIO.fromBytes(buf); } catch (e) { throw new CloudError('badSheet', e.message); }
-    } else {
-      const content = JSON.parse(await request('GET', `${API}/files/${encodeURIComponent(id)}?alt=media`, { raw: true }));
-      state = content.state || content;
-    }
+    try { state = await window.SheetIO.fromBytes(buf); } catch (e) { throw new CloudError('badSheet', e.message); }
     return { record: { id, version: Number(m.version) || 0, updated: m.modifiedTime, state } };
   }
 

@@ -522,10 +522,7 @@
     try { await window.SheetIO.download(st, `${(st.title || t('appName')).replace(/[\\/:*?"<>|]/g, '_')}-${stamp}.xlsx`); }
     catch (e) { alert(t('fileError')); }
   });
-  async function readClassFile(f) {
-    if (/\.(xlsx|xls|ods)$/i.test(f.name)) return window.SheetIO.fromBytes(await f.arrayBuffer());
-    return JSON.parse(await f.text());
-  }
+  const readClassFile = async f => window.SheetIO.fromBytes(await f.arrayBuffer());
 
   $('#btnOpen').addEventListener('click', () => $('#openFile').click());
   $('#openFile').addEventListener('change', async e => {
