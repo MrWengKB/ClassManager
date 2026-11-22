@@ -295,3 +295,12 @@ body.cloud-on .cloudbar { display: flex; }
   font-weight: 600; font-size: 15px; color: #3c4043; min-height: 44px;
 }
 .gsign:hover:not(:disabled) { background: #f8f9fa; border-color: #c6c9cc; }
+/* privacy policy */
+.doc { flex: 1; max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; line-height: 1.65; }
+.doc h1 { font-size: 24px; margin: 8px 0 4px; }
+.doc h2 { font-size: 17px; margin: 22px 0 6px; }
+.doc ul { padding-left: 22px; }
+.doc a { color: var(--accent); }
+.doc hr { border: none; border-top: 1px solid var(--line); margin: 36px 0; }
+.auth-card .privacy { text-align: center; font-size: 12px; }
+.auth-card .privacy a { color: var(--muted); }
