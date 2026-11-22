@@ -8,7 +8,7 @@
     return [{ id: 'r_leader', key: 'leader', name: '' }, { id: 'r_monitor', key: 'monitor', name: '' }];
   }
   function blank() {
-    return { app: 'classmanager', version: 1, title: '', desks: [], groups: [], students: [], roles: defaultRoles(), constraints: [], pointItems: window.Points.defaults(), scores: {}, pointLog: [], reading: {} };
+    return { app: 'classmanager', version: 1, title: '', desks: [], groups: [], students: [], roles: defaultRoles(), constraints: [], pointItems: window.Points.defaults(), scores: {}, pointLog: [], pointDays: {}, reading: {} };
   }
 
   // Bring any loaded / mutated state into a consistent shape and drop dangling references.

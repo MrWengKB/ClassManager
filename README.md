@@ -23,7 +23,8 @@ Class Manager 是给老师用的班级管理网页：摆放座位、导入名单
 - **导入名单**：粘贴文字，或选择 `.txt`、`.csv`、`.xlsx` 文件，一行一位学生。性别可写在逗号或 Tab 后面（`M/F`、`男/女`、`L/P`、`ஆண்/பெண்` 等）。
 - **排座位**：随机分配，或男女平衡分配。可以设定条件，比如「A 不能坐在 B 旁边」「A 和 B 不能同组」。也可以手动拖放安排。
 - **职务**：内置组长和班长，也能自己添加、改名、删除职务。
-- **加分**：在管理页设定加分项目、分值和图标，项目可以设为个人或小组。在主页点学生座位加个人分；点小组名称加小组分，全组每位组员都会得分。侧栏有分数排行榜、小组排名、各项目统计和最近记录，可以撤销。
+- **加分**：在管理页设定加分项目、分值和图标，项目可以设为个人或小组。在主页点学生座位加个人分；点小组名称加小组分，全组每位组员都会得分。侧栏有分数排行榜（可以只看某一项）、小组排名和最近记录，可以撤销。
+- **加分统计**（弹窗）：各项目统计、每日记录（全班每天每项的得分），以及学生进度（一位学生每项、每天的得分）。在排行榜上点学生名字也能打开。
 - **幸运抽选**：讲台左边有「全班」「男生」「女生」三个按钮。同一组会先把每个人都抽过一遍才重复，抽中的学生座位会高亮。
 - **倒计时**：讲台右边。有常用时长可选，也可以自己设定，能暂停、加 1 分钟。关掉弹窗也会继续计时，时间到会响铃提醒。
 - **阅读打卡**：使用同一份名单。点书本打卡，满 10 本算 1 轮。有本周、本月阅读统计和阅读榜。阅读记录单独统计，不计入积分。
@@ -56,7 +57,8 @@ Class Manager is a classroom management website for teachers. Lay out the desks,
 - **Class list import**: paste text or choose a `.txt`, `.csv` or `.xlsx` file, one student per line. Gender can go after a comma or tab (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` and so on).
 - **Seating**: assign seats randomly or balance boys and girls. Add conditions such as "A must not sit next to B" or "A and B must not be in the same group". You can also arrange seats by hand with drag and drop.
 - **Roles**: group leader and class monitor are built in, and you can add, rename or delete your own roles.
-- **Points**: set up point items with points and icons on the Manage page, each for individuals or for groups. On the home page, click a student's desk for individual points, or click a group name for group points, which every member of the group receives. The sidebar shows the leaderboard, group ranking, totals per item and recent awards, which can be undone.
+- **Points**: set up point items with points and icons on the Manage page, each for individuals or for groups. On the home page, click a student's desk for individual points, or click a group name for group points, which every member of the group receives. The sidebar shows the leaderboard (for all items or just one), group ranking and recent awards, which can be undone.
+- **Points statistics** (pop-up): totals per item, points by date for the whole class, and student progress (one student's points per item, per day). Click a name on the leaderboard to open it too.
 - **Lucky draw**: three buttons left of the front of the class: Class, Boys and Girls. Everyone in that pool is picked once before anyone repeats, and the picked student's desk is highlighted.
 - **Timer**: right of the front of the class. Choose a preset or set your own time, with pause and +1 minute. It keeps running when the window is closed and beeps when time is up.
 - **Reading log**: uses the same class list. Tap a book to log it, and 10 books make 1 round. Includes weekly and monthly stats and a reading ranking. Reading is tracked separately and does not count towards points.
@@ -89,7 +91,8 @@ Class Manager ialah laman web pengurusan kelas untuk guru. Susun meja, import se
 - **Import senarai kelas**: tampal teks atau pilih fail `.txt`, `.csv` atau `.xlsx`, seorang murid setiap baris. Jantina boleh ditulis selepas koma atau tab (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` dan sebagainya).
 - **Tempat duduk**: agihkan secara rawak atau seimbangkan lelaki dan perempuan. Tambah syarat seperti "A tidak boleh duduk sebelah B" atau "A dan B tidak boleh sekumpulan". Anda juga boleh menyusun sendiri dengan seret dan lepas.
 - **Jawatan**: ketua kumpulan dan ketua darjah sudah tersedia, dan anda boleh menambah, menukar nama atau memadam jawatan sendiri.
-- **Mata**: tetapkan item mata, nilai mata dan ikon di halaman Urus, sama ada untuk individu atau kumpulan. Di halaman utama, klik meja murid untuk mata individu, atau klik nama kumpulan untuk mata kumpulan yang diterima oleh setiap ahli. Bar sisi memaparkan papan pendahulu, kedudukan kumpulan, jumlah bagi setiap item dan rekod terkini, yang boleh dibuat asal.
+- **Mata**: tetapkan item mata, nilai mata dan ikon di halaman Urus, sama ada untuk individu atau kumpulan. Di halaman utama, klik meja murid untuk mata individu, atau klik nama kumpulan untuk mata kumpulan yang diterima oleh setiap ahli. Bar sisi memaparkan papan pendahulu (semua item atau satu item sahaja), kedudukan kumpulan dan rekod terkini, yang boleh dibuat asal.
+- **Statistik mata** (tetingkap timbul): jumlah bagi setiap item, mata seluruh kelas mengikut tarikh, dan kemajuan murid (mata seorang murid bagi setiap item, setiap hari). Klik nama di papan pendahulu untuk membukanya juga.
 - **Cabutan bertuah**: tiga butang di sebelah kiri hadapan kelas: Kelas, Lelaki dan Perempuan. Setiap orang dalam kumpulan itu dicabut sekali sebelum ada yang berulang, dan meja murid yang terpilih diserlahkan.
 - **Pemasa**: di sebelah kanan hadapan kelas. Pilih tempoh sedia ada atau tetapkan sendiri, dengan jeda dan +1 minit. Pemasa terus berjalan walaupun tetingkap ditutup, dan berbunyi apabila masa tamat.
 - **Rekod bacaan**: menggunakan senarai kelas yang sama. Tekan buku untuk merekod, dan 10 buku = 1 pusingan. Ada statistik mingguan dan bulanan serta kedudukan bacaan. Bacaan dikira berasingan dan tidak termasuk dalam mata.
@@ -122,7 +125,8 @@ Class Manager என்பது ஆசிரியர்களுக்கா�
 - **வகுப்புப் பட்டியல் இறக்குமதி**: உரையை ஒட்டலாம், அல்லது `.txt`, `.csv`, `.xlsx` கோப்பைத் தேர்ந்தெடுக்கலாம், ஒரு வரிக்கு ஒரு மாணவர். பாலினத்தைக் காற்புள்ளி அல்லது Tab-க்குப் பின் எழுதலாம் (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` போன்றவை).
 - **இருக்கை ஒதுக்கீடு**: சீரற்ற முறையில் ஒதுக்கலாம், அல்லது மாணவர், மாணவிகளைச் சமநிலைப்படுத்தலாம். "A, B-க்கு அருகில் அமரக்கூடாது", "A-யும் B-யும் ஒரே குழுவில் இருக்கக்கூடாது" போன்ற நிபந்தனைகளைச் சேர்க்கலாம். இழுத்து விடுவதன் மூலம் நீங்களே அமைக்கவும் முடியும்.
 - **பொறுப்புகள்**: குழுத் தலைவர், வகுப்புத் தலைவர் ஆகியவை உள்ளமைக்கப்பட்டவை. உங்கள் சொந்தப் பொறுப்புகளைச் சேர்க்கலாம், பெயர் மாற்றலாம், நீக்கலாம்.
-- **புள்ளிகள்**: நிர்வாகப் பக்கத்தில் புள்ளி உருப்படிகள், புள்ளி மதிப்பு, சின்னம் ஆகியவற்றை அமைக்கலாம்; ஒவ்வொன்றும் தனிநபருக்கா குழுவுக்கா என்று தேர்வு செய்யலாம். முகப்புப் பக்கத்தில் மாணவரின் மேசையை அழுத்தினால் தனிநபர் புள்ளி; குழுப் பெயரை அழுத்தினால் குழுப் புள்ளி, அது குழுவின் ஒவ்வொரு உறுப்பினருக்கும் சேரும். பக்கப்பட்டியில் தரவரிசை, குழுத் தரவரிசை, உருப்படிவாரி மொத்தம், சமீபத்திய பதிவுகள் காட்டப்படும்; பதிவுகளைச் செயல்தவிர்க்கலாம்.
+- **புள்ளிகள்**: நிர்வாகப் பக்கத்தில் புள்ளி உருப்படிகள், புள்ளி மதிப்பு, சின்னம் ஆகியவற்றை அமைக்கலாம்; ஒவ்வொன்றும் தனிநபருக்கா குழுவுக்கா என்று தேர்வு செய்யலாம். முகப்புப் பக்கத்தில் மாணவரின் மேசையை அழுத்தினால் தனிநபர் புள்ளி; குழுப் பெயரை அழுத்தினால் குழுப் புள்ளி, அது குழுவின் ஒவ்வொரு உறுப்பினருக்கும் சேரும். பக்கப்பட்டியில் தரவரிசை (எல்லா உருப்படிகளும் அல்லது ஒன்று மட்டும்), குழுத் தரவரிசை, சமீபத்திய பதிவுகள் காட்டப்படும்; பதிவுகளைச் செயல்தவிர்க்கலாம்.
+- **புள்ளிப் புள்ளிவிவரம்** (பாப்-அப்): உருப்படிவாரி மொத்தம், முழு வகுப்பின் தேதி வாரியான புள்ளிகள், மாணவர் முன்னேற்றம் (ஒரு மாணவர் ஒவ்வொரு உருப்படியிலும் ஒவ்வொரு நாளும் பெற்ற புள்ளிகள்). தரவரிசையில் பெயரை அழுத்தியும் திறக்கலாம்.
 - **அதிர்ஷ்டத் தேர்வு**: வகுப்பின் முன்பக்கத்தின் இடப்பக்கத்தில் வகுப்பு, மாணவர், மாணவிகள் என மூன்று பொத்தான்கள். அந்தப் பிரிவில் அனைவரும் ஒருமுறை தேர்வான பிறகுதான் மீண்டும் யாரும் வருவார்கள். தேர்வான மாணவரின் மேசை முன்னிலைப்படுத்தப்படும்.
 - **நேரக் கணிப்பான்**: வகுப்பின் முன்பக்கத்தின் வலப்பக்கத்தில். முன்னமைக்கப்பட்ட நேரத்தைத் தேர்வு செய்யலாம் அல்லது நீங்களே அமைக்கலாம்; இடைநிறுத்தம், +1 நிமிடம் வசதிகளுடன். சாளரத்தை மூடினாலும் ஓடிக்கொண்டிருக்கும், நேரம் முடிந்ததும் ஒலிக்கும்.
 - **வாசிப்புப் பதிவு**: அதே வகுப்புப் பட்டியலைப் பயன்படுத்தும். புத்தகத்தை அழுத்திப் பதிவு செய்யலாம். 10 புத்தகங்கள் = 1 சுற்று. வாராந்திர, மாதாந்திரப் புள்ளிவிவரங்களும் வாசிப்புத் தரவரிசையும் உண்டு. வாசிப்பு தனியாகக் கணக்கிடப்படும், புள்ளிகளில் சேராது.

@@ -424,7 +424,7 @@
       if (confirm(t('confirmDeleteItem', { name: window.Points.itemName(it, t) }))) Store.commit(st => { st.pointItems = st.pointItems.filter(x => x.id !== id); });
     },
     toggleTarget: id => Store.commit(st => { const it = st.pointItems.find(x => x.id === id); if (it) it.group = !it.group; }),
-    resetScores: () => { if (confirm(t('confirmResetScores'))) Store.commit(st => { st.scores = {}; st.pointLog = []; }); },
+    resetScores: () => { if (confirm(t('confirmResetScores'))) Store.commit(st => { st.scores = {}; st.pointLog = []; st.pointDays = {}; }); },
     toggleRole: id => {
       const sid = ui.picked; if (!sid) return;
       Store.commit(st => {

@@ -4,6 +4,7 @@
  * state.scores:     { studentId: { itemId: [count, pointsSum] } }   (totals only, so the file stays small)
  * state.pointLog:   [{ id, s, i, p, at, g? }]   the most recent awards, newest last, for undo and "recent"
  *                   a group award has g = group id and s = [member ids at that moment]
+ * state.pointDays:  { 'YYYY-MM-DD': { studentId: { itemId: [count, pointsSum] } } }   points per day (local date)
  */
 (function () {
   const ICONS = ['⭐', '🙋', '🤝', '📘', '👥', '🎨', '🏃', '🧹', '💡', '🎵', '🏆', '👏'];
@@ -42,6 +43,53 @@
       .filter(e => e && e.id && iid.has(e.i))
       .map(e => Array.isArray(e.s) ? Object.assign({}, e, { s: e.s.filter(id => studentIds.has(id)) }) : e)
       .filter(e => Array.isArray(e.s) ? e.s.length : studentIds.has(e.s)).slice(-LOG_MAX);
+    b.pointDays = {};
+    const days = s.pointDays && typeof s.pointDays === 'object' ? s.pointDays : {};
+    Object.keys(days).forEach(day => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !days[day] || typeof days[day] !== 'object') return;
+      Object.keys(days[day]).forEach(sid => {
+        const m = days[day][sid];
+        if (!studentIds.has(sid) || !m || typeof m !== 'object') return;
+        Object.keys(m).forEach(id => {
+          const v = m[id];
+          if (!iid.has(id) || !Array.isArray(v) || !(v[0] > 0)) return;
+          ((b.pointDays[day] = b.pointDays[day] || {})[sid] = b.pointDays[day][sid] || {})[id] = [v[0] | 0, +v[1] || 0];
+        });
+      });
+    });
+  }
+  // local date of an ISO time, as YYYY-MM-DD
+  function dayOf(at) {
+    const d = at ? new Date(at) : new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  // add (n = 1) or take back (n = -1) one award in the totals and in that day's record
+  function bump(state, sid, iid, p, at, n) {
+    if (n > 0) {
+      const cell = ((state.scores[sid] = state.scores[sid] || {})[iid] = state.scores[sid][iid] || [0, 0]);
+      cell[0] += 1; cell[1] += p;
+    } else {
+      const cell = state.scores[sid] && state.scores[sid][iid];
+      if (cell) {
+        cell[0] -= 1; cell[1] -= p;
+        if (cell[0] <= 0) delete state.scores[sid][iid];
+        if (!Object.keys(state.scores[sid]).length) delete state.scores[sid];
+      }
+    }
+    const day = dayOf(at);
+    state.pointDays = state.pointDays || {};
+    if (n > 0) {
+      const dc = (((state.pointDays[day] = state.pointDays[day] || {})[sid] = state.pointDays[day][sid] || {})[iid] = state.pointDays[day][sid][iid] || [0, 0]);
+      dc[0] += 1; dc[1] += p;
+    } else {
+      const m = state.pointDays[day] && state.pointDays[day][sid], dc = m && m[iid];
+      if (dc) {
+        dc[0] -= 1; dc[1] -= p;
+        if (dc[0] <= 0) delete m[iid];
+        if (!Object.keys(m).length) delete state.pointDays[day][sid];
+        if (!Object.keys(state.pointDays[day]).length) delete state.pointDays[day];
+      }
+    }
   }
 
   function itemName(it, t) { return it.name || (it.key ? t('pt_' + it.key) : '?'); }
@@ -54,9 +102,8 @@
   function add(state, sid, iid, entryId, at) {
     const it = state.pointItems.find(x => x.id === iid);
     if (!it || !state.students.some(x => x.id === sid)) return null;
-    const cell = ((state.scores[sid] = state.scores[sid] || {})[iid] = state.scores[sid][iid] || [0, 0]);
-    cell[0] += 1; cell[1] += it.points;
     const e = { id: entryId, s: sid, i: iid, p: it.points, at: at || new Date().toISOString() };
+    bump(state, sid, iid, it.points, e.at, 1);
     state.pointLog.push(e);
     if (state.pointLog.length > LOG_MAX) state.pointLog.splice(0, state.pointLog.length - LOG_MAX);
     return e;
@@ -67,11 +114,8 @@
     if (!it || !state.groups.some(g => g.id === gid)) return null;
     const ids = (members || groupMembers(state, gid)).filter(id => state.students.some(x => x.id === id));
     if (!ids.length) return null;
-    ids.forEach(sid => {
-      const cell = ((state.scores[sid] = state.scores[sid] || {})[iid] = state.scores[sid][iid] || [0, 0]);
-      cell[0] += 1; cell[1] += it.points;
-    });
     const e = { id: entryId, g: gid, s: ids, i: iid, p: it.points, at: at || new Date().toISOString() };
+    ids.forEach(sid => bump(state, sid, iid, it.points, e.at, 1));
     state.pointLog.push(e);
     if (state.pointLog.length > LOG_MAX) state.pointLog.splice(0, state.pointLog.length - LOG_MAX);
     return e;
@@ -83,13 +127,7 @@
     const k = state.pointLog.findIndex(e => e.id === entryId);
     if (k < 0) return false;
     const e = state.pointLog[k];
-    (Array.isArray(e.s) ? e.s : [e.s]).forEach(sid => {
-      const cell = state.scores[sid] && state.scores[sid][e.i];
-      if (!cell) return;
-      cell[0] -= 1; cell[1] -= e.p;
-      if (cell[0] <= 0) delete state.scores[sid][e.i];
-      if (!Object.keys(state.scores[sid]).length) delete state.scores[sid];
-    });
+    (Array.isArray(e.s) ? e.s : [e.s]).forEach(sid => bump(state, sid, e.i, e.p, e.at, -1));
     state.pointLog.splice(k, 1);
     return true;
   }
@@ -109,9 +147,12 @@
     state.students.forEach(s => map.set(s.id, total(state, s.id)));
     return map;
   }
-  // [{ student, total, rank }] highest first; equal totals share a rank
-  function leaderboard(state) {
-    const rows = state.students.map(s => ({ student: s, total: total(state, s.id) }))
+  // [{ student, total, count, rank }] highest first; equal totals share a rank.
+  // With an item id: only that item, and only students who got it.
+  function leaderboard(state, itemId) {
+    const rows = (itemId
+      ? state.students.map(s => { const v = state.scores[s.id] && state.scores[s.id][itemId]; return v ? { student: s, total: v[1], count: v[0] } : null; }).filter(Boolean)
+      : state.students.map(s => ({ student: s, total: total(state, s.id) })))
       .sort((a, b) => b.total - a.total || a.student.name.localeCompare(b.student.name));
     rows.forEach((r, i) => { r.rank = i && r.total === rows[i - 1].total ? rows[i - 1].rank : i + 1; });
     return rows;
@@ -138,5 +179,20 @@
     });
   }
 
-  window.Points = { defaults, normalize, itemName, nextIcon, add, addGroup, groupMembers, undo, apply, total, totals, leaderboard, groupBoard, itemStats, ICONS };
+  // Dates with records, newest first
+  function days(state) { return Object.keys(state.pointDays || {}).sort().reverse(); }
+  // { itemId: [count, sum] } for the whole class on one day
+  function dayItems(state, day) {
+    const out = {}, d = (state.pointDays || {})[day] || {};
+    Object.values(d).forEach(m => Object.keys(m).forEach(id => { const o = out[id] = out[id] || [0, 0]; o[0] += m[id][0]; o[1] += m[id][1]; }));
+    return out;
+  }
+  // { day: { itemId: [count, sum] } } for one student
+  function studentDays(state, sid) {
+    const out = {};
+    Object.keys(state.pointDays || {}).forEach(day => { const m = state.pointDays[day][sid]; if (m) out[day] = m; });
+    return out;
+  }
+
+  window.Points = { dayOf, days, dayItems, studentDays, defaults, normalize, itemName, nextIcon, add, addGroup, groupMembers, undo, apply, total, totals, leaderboard, groupBoard, itemStats, ICONS };
 })();

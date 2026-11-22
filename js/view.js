@@ -55,27 +55,29 @@
   }
 
   /* ---------- points sidebar ---------- */
+  let lbItem = 'all'; // leaderboard filter: 'all' or an item id
   function pointsSections(st, students) {
     const P = window.Points;
-    let h = `<section><h3>${t('leaderboard')}</h3>`;
+    if (lbItem !== 'all' && !st.pointItems.some(it => it.id === lbItem)) lbItem = 'all';
+    let h = `<section><div class="sbtns">
+      <button data-stats="items">📊 ${esc(t('itemStatsTitle'))}</button><button data-stats="daily">📅 ${esc(t('dailyTitle'))}</button><button data-stats="progress">👤 ${esc(t('progressTitle'))}</button></div></section>`;
+    h += `<section><h3>${t('leaderboard')}</h3>`;
     if (!st.pointItems.length) h += `<p class="hint">${t('noItems')}</p>`;
-    else h += `<p class="hint small">${t('clickDeskHint')}${st.groups.length && st.pointItems.some(it => it.group) ? ' ' + t('clickGroupHint') : ''}</p>`;
-    h += `<ol class="lboard">${P.leaderboard(st).map(r =>
-      `<li class="${r.rank <= 3 && r.total > 0 ? 'top' + r.rank : ''}"><b class="rank">${r.rank}</b><span>${esc(r.student.name)}</span><span class="spacer"></span><b class="tot">${r.total}</b></li>`).join('')}</ol></section>`;
+    else {
+      h += `<p class="hint small">${t('clickDeskHint')}${st.groups.length && st.pointItems.some(it => it.group) ? ' ' + t('clickGroupHint') : ''} ${t('clickNameHint')}</p>`;
+      h += `<select id="lbFilter" class="lbfilter" aria-label="${esc(t('leaderboard'))}"><option value="all">${esc(t('lbAll'))}</option>${st.pointItems.map(it =>
+        `<option value="${esc(it.id)}"${it.id === lbItem ? ' selected' : ''}>${esc(it.icon + ' ' + P.itemName(it, t))}</option>`).join('')}</select>`;
+    }
+    const rows = P.leaderboard(st, lbItem === 'all' ? null : lbItem);
+    h += rows.length ? `<ol class="lboard">${rows.map(r =>
+      `<li class="${r.rank <= 3 && r.total > 0 ? 'top' + r.rank : ''}" data-prog="${esc(r.student.id)}"><b class="rank">${r.rank}</b><span>${esc(r.student.name)}</span><span class="spacer"></span>${r.count ? `<span class="muted small">${r.count}×</span>` : ''}<b class="tot">${r.total}</b></li>`).join('')}</ol>`
+      : `<p class="hint">${t('noHistory')}</p>`;
+    h += `</section>`;
 
     const gb = P.groupBoard(st);
     if (gb.length) {
       h += `<section><h3>${t('groupBoard')}</h3><ol class="lboard">${gb.map((r, i) =>
         `<li><b class="rank">${i + 1}</b><span class="swatch" style="background:${Layout.COLORS[r.group.color % Layout.COLORS.length]}"></span><span>${esc(Layout.groupName(r.group, st))}</span><span class="spacer"></span><b class="tot">${r.total}</b></li>`).join('')}</ol></section>`;
-    }
-
-    if (st.pointItems.length) {
-      h += `<section><h3>${t('itemStatsTitle')}</h3><ul class="istats">`;
-      P.itemStats(st).forEach(x => {
-        h += `<li><div><span class="picon">${esc(x.item.icon)}</span> <b>${esc(P.itemName(x.item, t))}</b> <span class="muted">${x.item.points > 0 ? '+' : ''}${x.item.points}</span></div>
-          <div class="muted">${esc(t('itemStatLine', { n: x.count, p: x.points }))}${x.top.length ? ' · ' + esc(t('itemTop', { names: x.top.map(s => s.name).join(', '), n: x.best })) : ''}</div></li>`;
-      });
-      h += '</ul></section>';
     }
 
     const recent = st.pointLog.slice(-6).reverse();
@@ -92,6 +94,75 @@
     }
     return h;
   }
+
+  /* ---------- points statistics pop-up: by item, by date, one student ---------- */
+  const sm = document.createElement('div');
+  sm.className = 'mdo statsmodal';
+  sm.hidden = true;
+  document.body.appendChild(sm);
+  const SM = { tab: 'items', student: null };
+  function openStats(tab, student) {
+    SM.tab = tab; if (student) SM.student = student;
+    sm.hidden = false; renderStats();
+  }
+  function closeStats() { sm.hidden = true; }
+  const signed = n => (n > 0 ? '+' : '') + n;
+  // true when some of these points were given before per-day records existed
+  function undated(st, sids) {
+    let all = 0, dated = 0;
+    sids.forEach(sid => {
+      Object.values(st.scores[sid] || {}).forEach(v => { all += v[0]; });
+      Object.values(st.pointDays || {}).forEach(d => Object.values(d[sid] || {}).forEach(v => { dated += v[0]; }));
+    });
+    return all > dated;
+  }
+  function renderStats() {
+    if (sm.hidden) return;
+    const st = Store.state, P = window.Points;
+    const items = st.pointItems;
+    const iname = it => esc(P.itemName(it, t));
+    const md = d => esc(d.slice(5).replace('-', '/'));
+    let body = '';
+    if (SM.tab === 'items') {
+      body = !items.length ? `<p class="hint">${t('noItems')}</p>` : `<ul class="istats big">${P.itemStats(st).map(x =>
+        `<li><span class="picon">${esc(x.item.icon)}</span><div><b>${iname(x.item)}</b> <span class="muted">${signed(x.item.points)}${x.item.group ? ' · ' + esc(t('forGroup')) : ''}</span>
+          <div class="muted">${esc(t('itemStatLine', { n: x.count, p: x.points }))}${x.top.length ? ' · ' + esc(t('itemTop', { names: x.top.map(s => s.name).join(', '), n: x.best })) : ''}</div></div>
+          <button class="ghostbtn small" data-lb="${esc(x.item.id)}">🏆</button></li>`).join('')}</ul>`;
+    } else if (SM.tab === 'daily') {
+      const days = P.days(st);
+      body = !days.length ? `<p class="hint">${t('noHistory')}</p>` : `<div class="mtx"><table><thead><tr><th>${t('colDate')}</th>${items.map(it => `<th title="${iname(it)}">${esc(it.icon)}<small>${iname(it)}</small></th>`).join('')}<th class="tcol">${t('dailyTotal')}</th></tr></thead><tbody>${days.map(d => {
+        const m = P.dayItems(st, d);
+        const tot = Object.values(m).reduce((a, v) => a + v[1], 0);
+        return `<tr><td class="dcol">${md(d)}</td>${items.map(it => { const v = m[it.id]; return `<td class="${v ? 'hasv' : ''}">${v ? `${v[0]}×<small>${signed(v[1])}</small>` : '-'}</td>`; }).join('')}<td class="tcol">${tot}</td></tr>`;
+      }).join('')}</tbody></table></div>${undated(st, st.students.map(x => x.id)) ? `<p class="hint small">${t('historyNote')}</p>` : ''}`;
+    } else {
+      if (!st.students.some(s => s.id === SM.student)) SM.student = (P.leaderboard(st)[0] || {}).student ? P.leaderboard(st)[0].student.id : null;
+      const s = st.students.find(x => x.id === SM.student);
+      const sel = `<select id="progSel" class="lbfilter">${P.leaderboard(st).map(r => `<option value="${esc(r.student.id)}"${r.student.id === SM.student ? ' selected' : ''}>${esc(r.student.name)} (${r.total})</option>`).join('')}</select>`;
+      if (!s) body = `<p class="hint">${t('noStudentsRead')}</p>`;
+      else {
+        const sd = P.studentDays(st, s.id), days = Object.keys(sd).sort().reverse();
+        const sc = st.scores[s.id] || {};
+        body = `<div class="proghead">${sel}<b class="scb">${P.total(st, s.id)} ⭐</b></div>` + (!days.length && !Object.keys(sc).length ? `<p class="hint">${t('noHistory')}</p>` :
+          `<div class="mtx"><table><thead><tr><th>${t('colItem')}</th><th class="tcol">${t('colTotal')}</th>${days.map(d => `<th>${md(d)}</th>`).join('')}</tr></thead><tbody>${items.map(it => {
+            const v = sc[it.id];
+            return `<tr><td class="icol">${esc(it.icon)} ${iname(it)}</td><td class="tcol">${v ? `${v[0]}×<small>${signed(v[1])}</small>` : '-'}</td>${days.map(d => { const c = sd[d][it.id]; return `<td class="${c ? 'hasv' : ''}">${c ? `${c[0]}×<small>${signed(c[1])}</small>` : '-'}</td>`; }).join('')}</tr>`;
+          }).join('')}<tr class="trow"><td>${t('dailyTotal')}</td><td class="tcol">${P.total(st, s.id)}</td>${days.map(d => `<td>${Object.values(sd[d]).reduce((a, v) => a + v[1], 0)}</td>`).join('')}</tr></tbody></table></div>${undated(st, [s.id]) ? `<p class="hint small">${t('historyNote')}</p>` : ''}`);
+      }
+    }
+    const tabs = [['items', '📊', 'itemStatsTitle'], ['daily', '📅', 'dailyTitle'], ['progress', '👤', 'progressTitle']];
+    sm.innerHTML = `<div class="mdc statscard"><div class="cthead"><h3>📊 ${esc(t('statsTitle'))}${st.title ? ' · ' + esc(st.title) : ''}</h3><button class="icon" data-sclose="1" aria-label="${esc(t('close'))}">✕</button></div>
+      <div class="stabs">${tabs.map(([k, ic, lab]) => `<button class="${SM.tab === k ? 'on' : ''}" data-stab="${k}">${ic} ${esc(t(lab))}</button>`).join('')}</div>${body}</div>`;
+  }
+  sm.addEventListener('click', e => {
+    if (e.target === sm || e.target.closest('[data-sclose]')) { closeStats(); return; }
+    const tb = e.target.closest('[data-stab]');
+    if (tb) { SM.tab = tb.dataset.stab; renderStats(); return; }
+    const lb = e.target.closest('[data-lb]');
+    if (lb) { lbItem = lb.dataset.lb; closeStats(); renderSide(); }
+  });
+  sm.addEventListener('change', e => { if (e.target.id === 'progSel') { SM.student = e.target.value; renderStats(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !sm.hidden) closeStats(); });
 
   /* ---------- giving points ---------- */
   const pop = $('#award');
@@ -173,8 +244,13 @@
   });
   $('#side').addEventListener('click', e => {
     const b = e.target.closest('[data-undo]');
-    if (b) undoAward(b.dataset.undo);
+    if (b) { undoAward(b.dataset.undo); return; }
+    const sb = e.target.closest('[data-stats]');
+    if (sb) { openStats(sb.dataset.stats); return; }
+    const pr = e.target.closest('[data-prog]');
+    if (pr) openStats('progress', pr.dataset.prog);
   });
+  $('#side').addEventListener('change', e => { if (e.target.id === 'lbFilter') { lbItem = e.target.value; renderSide(); } });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopover(); });
 
   function renderAll() {
@@ -183,6 +259,7 @@
     renderHeader();
     Layout.render();
     renderSide();
+    renderStats();
   }
 
   $('#langSel').addEventListener('change', e => { window.I18n.setLang(e.target.value); renderAll(); ClassTools.relang(); });

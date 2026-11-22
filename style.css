@@ -423,3 +423,33 @@ ol.rrank { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4p
 .cpre { border: 2px solid #2A9D8F; background: #CCFBF1; color: #1e756a; border-radius: 999px; padding: 4px 12px; font-weight: 700; min-height: 0; }
 .cpre.on { background: #2A9D8F; color: #fff; }
 @media print { .fside { display: none; } }
+
+/* points statistics pop-up */
+.sbtns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.sbtns button { font-size: 12px; padding: 6px 4px; min-height: 34px; line-height: 1.25; justify-content: center; text-align: center; }
+select.lbfilter { width: 100%; margin: 0 0 8px; }
+.lboard li[data-prog] { cursor: pointer; }
+.lboard li[data-prog]:hover { outline: 2px solid #f9c74f; }
+.muted.small, .lboard .small { font-size: 12px; }
+.statscard { max-width: min(920px, 96vw); background: #fffdf8; border-color: #f4a261; }
+.stabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.stabs button { border-radius: 999px; font-weight: 700; }
+.stabs button.on { background: #f4a261; border-color: #e07b2e; color: #fff; }
+ul.istats.big { gap: 10px; }
+.istats.big li { display: flex; align-items: center; gap: 10px; background: #faf6ee; border-radius: 10px; padding: 8px 10px; }
+.istats.big li > div { flex: 1; }
+.istats.big .picon { font-size: 22px; }
+.mtx { overflow: auto; max-height: 60vh; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.mtx table { border-collapse: collapse; font-size: 13px; min-width: 100%; }
+.mtx th, .mtx td { padding: 6px 8px; text-align: center; border-bottom: 1px solid #f0ebe2; white-space: nowrap; }
+.mtx th { position: sticky; top: 0; background: #fdf1e3; z-index: 1; font-size: 12px; }
+.mtx th small { display: block; font-weight: 600; max-width: 90px; overflow: hidden; text-overflow: ellipsis; margin: 0 auto; }
+.mtx td small { display: block; font-size: 11px; color: var(--muted); }
+.mtx td.hasv { background: #fff7e0; font-weight: 700; }
+.mtx td:first-child, .mtx th:first-child { position: sticky; left: 0; background: #fffaf2; text-align: left; z-index: 2; }
+.mtx th:first-child { z-index: 3; background: #fdf1e3; }
+.mtx .tcol { background: #eef8f6; font-weight: 800; }
+.mtx tr.trow td { font-weight: 800; background: #f6f1e8; }
+.proghead { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.proghead select { flex: 1; margin: 0; }
+.scb { background: #fef3c7; border: 1px solid #fcd34d; color: #b45309; border-radius: 999px; padding: 4px 12px; white-space: nowrap; }
