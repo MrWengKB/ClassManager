@@ -34,7 +34,7 @@
     const empty = needSignIn || (!cloud.loading && !st.desks.length);
     $('#emptyNote').hidden = !empty;
     $('#emptyNote b').textContent = needSignIn ? t('viewSignIn') : t('viewEmpty');
-    $('#emptyNote p').textContent = needSignIn ? '' : t('viewEmptyHint');
+    $('#emptyNote p').textContent = needSignIn ? t('aboutApp') : t('viewEmptyHint');
     $('#emptySignIn').hidden = !needSignIn;
     $('#emptySignIn').textContent = t('accSignInTitle');
     renderClassSel();

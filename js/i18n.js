@@ -172,6 +172,7 @@
     classSelect: ['Class', '班级', 'Kelas', 'வகுப்பு'],
     newClass: ['New class', '新建班级', 'Kelas baharu', 'புதிய வகுப்பு'],
     untitled: ['(untitled class)', '（未命名班级）', '(kelas tanpa nama)', '(பெயரிடப்படாத வகுப்பு)'],
+    aboutApp: ['Class Manager helps teachers plan their classroom: lay out the desks, import the class list, assign seats and give students roles. Your classes are saved in your own Google Drive.', 'Class Manager 帮助老师安排教室：摆放座位、导入名单、分配座位和指派职务。班级资料保存在你自己的 Google Drive 里。', 'Class Manager membantu guru merancang kelas: susun meja, import senarai kelas, agihkan tempat duduk dan beri jawatan kepada murid. Kelas anda disimpan dalam Google Drive anda sendiri.', 'Class Manager ஆசிரியர்கள் வகுப்பறையைத் திட்டமிட உதவுகிறது: மேசைகளை அமைத்தல், வகுப்புப் பட்டியலை இறக்குமதி செய்தல், இருக்கைகள் மற்றும் பொறுப்புகளை ஒதுக்குதல். உங்கள் வகுப்புகள் உங்கள் சொந்த Google Drive-இல் சேமிக்கப்படும்.'],
     viewSignIn: ['Sign in to see your classes.', '登录后就能看到班级。', 'Log masuk untuk melihat kelas anda.', 'உங்கள் வகுப்புகளைப் பார்க்க உள்நுழையவும்.'],
     signedInAs: ['Signed in as {name}', '已登录：{name}', 'Log masuk sebagai {name}', '{name} ஆக உள்நுழைந்துள்ளீர்கள்'],
     signOut: ['Sign out', '退出登录', 'Log keluar', 'வெளியேறு'],

@@ -304,3 +304,4 @@ body.cloud-on .cloudbar { display: flex; }
 .doc hr { border: none; border-top: 1px solid var(--line); margin: 36px 0; }
 .auth-card .privacy { text-align: center; font-size: 12px; }
 .auth-card .privacy a { color: var(--muted); }
+.foot a { color: var(--muted); }
