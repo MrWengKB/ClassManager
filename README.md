@@ -1,4 +1,4 @@
-<h1>Class Manager</h1>
+<h1>课堂管家 · Class Manager</h1>
 
 [华文](#华文) · [English](#english) · [Bahasa Melayu](#bahasa-melayu) · [தமிழ்](#தமிழ்)
 
@@ -6,7 +6,7 @@
 
 ## 华文
 
-Class Manager 是给老师用的班级管理网页：摆放座位、导入名单、排座位、指派职务、给学生加分、记录阅读，上课时还能幸运抽选和倒计时。用 Google 账号登录，每位老师的班级资料保存在自己的 Google Drive 里，换电脑、换手机都能接着用。
+课堂管家（Class Manager）是给老师用的班级管理网页：摆放座位、导入名单、排座位、指派职务、给学生加分、记录阅读，上课时还能幸运抽选和倒计时。用 Google 账号登录，每位老师的班级资料保存在自己的 Google Drive 里，换电脑、换手机都能接着用。
 
 ### 页面
 

@@ -4,7 +4,7 @@
 
   // key: [en, zh, ms, ta]
   const S = {
-    appName: ['Class Manager', 'Class Manager', 'Class Manager', 'Class Manager'],
+    appName: ['Class Manager', '课堂管家', 'Class Manager', 'Class Manager'],
     appSub: ['Classroom seating planner', '座位编排小帮手', 'Perancang tempat duduk kelas', 'வகுப்பறை இருக்கை திட்டமிடல்'],
     classNamePh: ['Class name, e.g. 3E2', '班级名称，如：三年级忠班', 'Nama kelas, cth. 3 Bestari', 'வகுப்பின் பெயர், எ.கா. 3E2'],
     language: ['Language', '语言', 'Bahasa', 'மொழி'],
@@ -38,7 +38,7 @@
     offlineTip: ['Download the website files (.zip). Unzip and open index.html to use it on your computer without internet.', '下载网站源文件（.zip）。解压后打开 index.html，就能在电脑上离线使用。', 'Muat turun fail laman web (.zip). Nyahzip dan buka index.html untuk menggunakannya di komputer tanpa internet.', 'இணையதளக் கோப்புகளைப் பதிவிறக்கவும் (.zip). பிரித்தெடுத்து index.html-ஐத் திறந்தால், இணையம் இல்லாமலேயே உங்கள் கணினியில் பயன்படுத்தலாம்.'],
     undo: ['Undo', '撤销', 'Buat asal', 'செயல்தவிர்'],
     redo: ['Redo', '重做', 'Buat semula', 'மீண்டும் செய்'],
-    fileError: ['This is not a valid Class Manager file.', '这不是有效的 Class Manager 文件。', 'Ini bukan fail Class Manager yang sah.', 'இது சரியான Class Manager கோப்பு அல்ல.'],
+    fileError: ['This is not a valid Class Manager file.', '这不是有效的课堂管家文件。', 'Ini bukan fail Class Manager yang sah.', 'இது சரியான Class Manager கோப்பு அல்ல.'],
     autosaved: ['Changes are saved automatically in this browser.', '改动会自动保存在本浏览器中。', 'Perubahan disimpan secara automatik dalam pelayar ini.', 'மாற்றங்கள் இந்த உலாவியில் தானாகச் சேமிக்கப்படும்.'],
 
     tabLayout: ['Layout', '布局', 'Susun atur', 'அமைப்பு'],
@@ -240,7 +240,7 @@
     classSelect: ['Class', '班级', 'Kelas', 'வகுப்பு'],
     newClass: ['New class', '新建班级', 'Kelas baharu', 'புதிய வகுப்பு'],
     untitled: ['(untitled class)', '（未命名班级）', '(kelas tanpa nama)', '(பெயரிடப்படாத வகுப்பு)'],
-    aboutApp: ['Class Manager helps teachers plan their classroom: lay out the desks, import the class list, assign seats and give students roles. Your classes are saved in your own Google Drive.', 'Class Manager 帮助老师安排教室：摆放座位、导入名单、分配座位和指派职务。班级资料保存在你自己的 Google Drive 里。', 'Class Manager membantu guru merancang kelas: susun meja, import senarai kelas, agihkan tempat duduk dan beri jawatan kepada murid. Kelas anda disimpan dalam Google Drive anda sendiri.', 'Class Manager ஆசிரியர்கள் வகுப்பறையைத் திட்டமிட உதவுகிறது: மேசைகளை அமைத்தல், வகுப்புப் பட்டியலை இறக்குமதி செய்தல், இருக்கைகள் மற்றும் பொறுப்புகளை ஒதுக்குதல். உங்கள் வகுப்புகள் உங்கள் சொந்த Google Drive-இல் சேமிக்கப்படும்.'],
+    aboutApp: ['Class Manager helps teachers plan their classroom: lay out the desks, import the class list, assign seats and give students roles. Your classes are saved in your own Google Drive.', '课堂管家帮助老师安排教室：摆放座位、导入名单、分配座位和指派职务。班级资料保存在你自己的 Google Drive 里。', 'Class Manager membantu guru merancang kelas: susun meja, import senarai kelas, agihkan tempat duduk dan beri jawatan kepada murid. Kelas anda disimpan dalam Google Drive anda sendiri.', 'Class Manager ஆசிரியர்கள் வகுப்பறையைத் திட்டமிட உதவுகிறது: மேசைகளை அமைத்தல், வகுப்புப் பட்டியலை இறக்குமதி செய்தல், இருக்கைகள் மற்றும் பொறுப்புகளை ஒதுக்குதல். உங்கள் வகுப்புகள் உங்கள் சொந்த Google Drive-இல் சேமிக்கப்படும்.'],
     viewSignIn: ['Sign in to see your classes.', '登录后就能看到班级。', 'Log masuk untuk melihat kelas anda.', 'உங்கள் வகுப்புகளைப் பார்க்க உள்நுழையவும்.'],
     signedInAs: ['Signed in as {name}', '已登录：{name}', 'Log masuk sebagai {name}', '{name} ஆக உள்நுழைந்துள்ளீர்கள்'],
     signOut: ['Sign out', '退出登录', 'Log keluar', 'வெளியேறு'],
