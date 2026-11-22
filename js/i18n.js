@@ -213,7 +213,7 @@
     adminLink: ['Manage', '管理', 'Urus', 'நிர்வகி'],
     viewLink: ['View', '查看', 'Lihat', 'பார்'],
 
-    // Reading check-in (readingcheckin.html)
+    // Reading log (readlog.html)
     drawTitle: ['Lucky draw', '幸运抽选', 'Cabutan bertuah', 'அதிர்ஷ்டத் தேர்வு'],
     drawAll: ['Class', '全班', 'Kelas', 'வகுப்பு'],
     drawBoys: ['Boys', '男生', 'Lelaki', 'மாணவர்'],

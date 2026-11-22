@@ -23,7 +23,7 @@
     const st = Store.state;
     if (Live.needSignIn()) {
       $('#readMain').innerHTML = `<div class="rcard empty-card"><b>${t('viewSignIn')}</b><p>${t('aboutApp')}</p>
-        <a class="navbtn primary" href="login.html?next=readingcheckin.html">${t('accSignInTitle')}</a></div>`;
+        <a class="navbtn primary" href="login.html?next=readlog.html">${t('accSignInTitle')}</a></div>`;
       $('#readSide').innerHTML = '';
       return;
     }
