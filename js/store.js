@@ -44,6 +44,13 @@
     b.constraints = b.constraints.filter(c => c && sid.has(c.a) && sid.has(c.b) && c.a !== c.b && (c.type === 'adjacent' || c.type === 'group'));
     window.Points.normalize(b, s, sid);
     window.Reading.normalize(b, s, sid);
+    // student view (see studentdata.js): the shared file and each student's secret key
+    const sv = s.studentView;
+    if (sv && typeof sv === 'object' && typeof sv.file === 'string' && /^[A-Za-z0-9_-]{10,}$/.test(sv.file)) {
+      const keys = {}, src = sv.keys && typeof sv.keys === 'object' ? sv.keys : {};
+      Object.keys(src).forEach(id => { if (sid.has(id) && /^[A-Za-z0-9]{16}$/.test(src[id])) keys[id] = src[id]; });
+      b.studentView = { file: sv.file, keys };
+    }
     return b;
   }
 

@@ -13,7 +13,8 @@
 - `index.html`：**班级一览**（主页）。显示座位图、小组和职务，点学生座位加分，点小组名称给全组加分。
 - `admin.html`：**管理**。布局、名单、排座位、职务、加分设置五个分页，需要先登录。
 - `readlog.html`：**阅读打卡**。从主页右上角进入，也能链接回主页。
-- `login.html`：用 Google 登录。
+- `login.html`：老师用 Google 登录；学生在这里扫码或粘贴自己的链接。
+- `student.html`：**学生端**（只读）。学生不用账号，用老师发的二维码 / 链接查看自己的分数、小组和阅读进度。
 
 ### 功能
 
@@ -32,11 +33,12 @@
 - **打印**：把整个教室排在一张横向的纸上。
 - **离线使用**：管理页右上角可以下载整个网站的 zip，解压后打开 `index.html` 即可。
 - **手机版**：手机屏幕会自动显示简化版：学生和小组列表（点名字加分）、幸运抽选；阅读打卡每人一个「+」按钮。浏览器选「桌面版网站」就显示完整版。
+- **学生端**：在管理页「名单」分页开启后，可以打印每个学生的二维码卡片。学生用手机或平板相机扫码就能看到自己的分数、排名、小组和阅读进度，不需要 Google 账号，只能看、不能改。每次保存时，网站会在 Drive 里更新一个「知道链接的人可查看」的文件，里面每个学生的资料都用他自己的密钥单独加密，没有那张卡片就看不到其他同学的资料。卡片丢了可以换新码，关闭学生端后所有卡片都会失效。
 - **四种界面语言**：页面右上角可以切换华文、English、Melayu、தமிழ்。
 
 ### 部署
 
-这是一个纯静态网页，放到 GitHub Pages 就能用。设定在 `js/config.js`：填入 Google OAuth Client ID；`useDrive` 设为 `false` 的话，资料只保存在浏览器里。Google Cloud 项目需要启用 Google Drive API，并把网站网址（例如 `https://mrwengkb.github.io`）加入已授权的 JavaScript 来源。
+这是一个纯静态网页，放到 GitHub Pages 就能用。设定在 `js/config.js`：填入 Google OAuth Client ID；`useDrive` 设为 `false` 的话，资料只保存在浏览器里。Google Cloud 项目需要启用 Google Drive API，并把网站网址（例如 `https://mrwengkb.github.io`）加入已授权的 JavaScript 来源。学生端还需要一个 API 密钥（`googleApiKey`），只允许 Google Drive API，并限制在网站网址使用。
 
 ---
 
@@ -49,7 +51,8 @@ Class Manager is a classroom management website for teachers. Lay out the desks,
 - `index.html`: the **class view** (home page). It shows the seating plan, groups and roles. Click a student's desk to award points, or a group name to award the whole group.
 - `admin.html`: **Manage**, with five tabs: Layout, Class list, Seating, Roles and Points. You need to sign in first.
 - `readlog.html`: the **reading log**. Open it from the top right of the home page; it links back to the home page.
-- `login.html`: Sign in with Google.
+- `login.html`: teachers sign in with Google; students scan or paste their own link here.
+- `student.html`: the **student view** (read only). Students need no account: the QR code / link from their teacher shows their own points, group and reading progress.
 
 ### Features
 
@@ -57,6 +60,7 @@ Class Manager is a classroom management website for teachers. Lay out the desks,
 - **View and edit in Google Sheets**: each class is a Google Sheet. You can edit the Students, Items, Roles and Reading tabs in Sheets (add, delete or change rows), and the site reads the changes the next time it opens the class. The other tabs are for reading only. Tab names, headers and built-in names in the Sheet are always in English; the site shows them in the page language.
 - **Multiple classes**: switch classes from the menu at the top, start a new class, or use **Export Excel** to get a workbook with sheets for students, point items, points by date and reading. It is also a full backup: **Import** on the Manage page restores it.
 - **Desk layout**: place single desks or groups of 4 or 6 on an empty floor. Drag, box-select, duplicate (Ctrl+D) and delete them, or generate whole rows at once. Select desks to make a group, and double-click a group name to rename it.
+- **Student view**: turn it on in Manage → Class list, then print a QR card for each student. Students scan it with a phone or tablet camera to see their own points, rank, group and reading, with no Google account and no way to change anything. On each save the site updates one file in Drive that anyone with the link can read; each student's entry in it is encrypted with that student's own key, so without their card nobody can read another student's details. A lost card can be given a new code, and turning the student view off makes every card stop working.
 - **Class list import**: paste text or choose a `.txt`, `.csv` or `.xlsx` file, one student per line. Gender can go after a comma or tab (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` and so on).
 - **Seating**: assign seats randomly or balance boys and girls. Add conditions such as "A must not sit next to B" or "A and B must not be in the same group". You can also arrange seats by hand with drag and drop.
 - **Roles**: group leader and class monitor are built in, and you can add, rename or delete your own roles.
@@ -86,6 +90,7 @@ Class Manager ialah laman web pengurusan kelas untuk guru. Susun meja, import se
 - `admin.html`: **Urus**, dengan lima tab: Susun atur, Senarai kelas, Tempat duduk, Jawatan dan Mata. Anda perlu log masuk dahulu.
 - `readlog.html`: **rekod bacaan**. Buka dari bahagian atas kanan halaman utama; ada pautan kembali ke halaman utama.
 - `login.html`: Log masuk dengan Google.
+- `student.html`: **paparan murid** (baca sahaja). Murid mengimbas kod QR daripada guru untuk melihat mata, kumpulan dan bacaan sendiri, tanpa akaun.
 
 ### Ciri-ciri
 
@@ -122,6 +127,7 @@ Class Manager என்பது ஆசிரியர்களுக்கா�
 - `admin.html`: **நிர்வாகம்**. அமைப்பு, வகுப்புப் பட்டியல், இருக்கை, பொறுப்புகள், புள்ளிகள் என ஐந்து தாவல்கள். முதலில் உள்நுழைய வேண்டும்.
 - `readlog.html`: **வாசிப்புப் பதிவு**. முகப்புப் பக்கத்தின் மேல் வலப்பக்கத்திலிருந்து திறக்கலாம்; முகப்புப் பக்கத்துக்குத் திரும்பும் இணைப்பும் உண்டு.
 - `login.html`: Google மூலம் உள்நுழைதல்.
+- `student.html`: **மாணவர் பார்வை** (பார்வை மட்டும்). ஆசிரியர் கொடுத்த QR குறியீட்டை ஸ்கேன் செய்து மாணவர்கள் தங்கள் புள்ளிகள், குழு, வாசிப்பைக் கணக்கு இல்லாமல் பார்க்கலாம்.
 
 ### அம்சங்கள்
 

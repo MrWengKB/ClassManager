@@ -46,6 +46,7 @@
     await flush();
     status = 'saving'; render();
     const state = Store.normalize(data || Store.blank());
+    delete state.studentView; // a copy of a class does not share the other class's student links
     let res;
     try { res = await Cloud.api('create', { state }); } catch (e) { status = 'error'; render(); throw e; }
     currentId = res.id; version = res.version; dirty = false;

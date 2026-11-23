@@ -167,12 +167,13 @@
         const badges = s.roles.map(r => roles.get(r)).filter(Boolean).map(r => `<span class="badge">${esc(roleName(r))}</span>`).join('');
         h += `<li>${genderBtn(s)}${chip(s)}${badges}
           <span class="spacer"></span>${seated.has(s.id) ? `<span class="seated" title="${esc(t('seatedMark'))}">✓</span>` : ''}
-          <button class="icon" data-act="renameStudent" data-id="${s.id}" title="${esc(t('rename'))}">✎</button>
+          ${window.StudentAdmin ? window.StudentAdmin.linkButton(s.id) : ''}<button class="icon" data-act="renameStudent" data-id="${s.id}" title="${esc(t('rename'))}">✎</button>
           <button class="icon danger" data-act="delStudent" data-id="${s.id}" title="${esc(t('delete'))}">✕</button></li>`;
       });
       h += `</ul><div class="btnrow"><button data-act="clearRoster" class="danger ghostbtn">${t('clearRoster')}</button></div>`;
     }
     h += '</section>';
+    if (window.StudentAdmin) h += window.StudentAdmin.section(st);
     return h;
   }
 
@@ -437,7 +438,7 @@
   side.addEventListener('click', e => {
     const b = e.target.closest('[data-act]');
     if (!b || b.disabled) return;
-    const fn = actions[b.dataset.act];
+    const fn = actions[b.dataset.act] || (window.StudentAdmin && window.StudentAdmin.actions[b.dataset.act]);
     if (fn) fn(b.dataset.id);
   });
   side.addEventListener('submit', e => {
@@ -607,6 +608,7 @@
     onZoom: renderHeader
   });
   Store.subscribe(renderAll);
+  if (window.StudentAdmin) window.StudentAdmin.init(renderSide);
   // Without Google Drive, the class view saves points in this browser too: pick them up here.
   if (!(window.CM_CONFIG && window.CM_CONFIG.useDrive)) {
     window.addEventListener('storage', e => {

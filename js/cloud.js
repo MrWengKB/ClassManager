@@ -31,15 +31,17 @@
     if (res.status === 401 && !retried) { await reauth(true); return request(method, url, opts, true); }
     if (res.status === 404) throw new CloudError('notFound');
     if (!res.ok) throw new CloudError(res.status === 403 ? 'forbidden' : 'server', await res.text().catch(() => ''));
+    if (res.status === 204) return {};
     return opts && opts.bytes ? res.arrayBuffer() : res.json();
   }
   const q = s => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
 
   // metadata (JSON) + an .xlsx file, for Drive to convert into a Google Sheet
-  function multipartXlsx(meta, bytes) {
+  function multipartXlsx(meta, bytes) { return multipart(meta, new Uint8Array(bytes), XLSX_MIME); }
+  function multipart(meta, content, mime) {
     const boundary = 'cm' + Math.random().toString(36).slice(2);
-    const body = new Blob([`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: ${XLSX_MIME}\r\n\r\n`,
-      new Uint8Array(bytes), `\r\n--${boundary}--`]);
+    const body = new Blob([`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: ${mime}\r\n\r\n`,
+      content, `\r\n--${boundary}--`]);
     return { headers: { 'Content-Type': 'multipart/related; boundary=' + boundary }, body };
   }
 
@@ -135,7 +137,59 @@
     await request('PATCH', `${UPLOAD}/files/${encodeURIComponent(id)}?uploadType=multipart&fields=id`,
       multipartXlsx({ name: fileName(state) }, await window.SheetIO.toBytes(state)));
     const m = await meta(id);
+    publishStudents(state);
     return { version: Number(m.version) || 0, updated: m.modifiedTime };
+  }
+
+  /* ---------- student view (see studentdata.js) ---------- */
+  // Turn it on: a JSON file in the folder that anyone with the link can read (it only holds encrypted entries).
+  async function studentsOn(title) {
+    const fid = await folderId();
+    const name = 'Class Manager · student view · ' + (String(title || '').trim() || t('untitled')).replace(/[\\/]/g, '_').slice(0, 80) + '.json';
+    const res = await request('POST', `${UPLOAD}/files?uploadType=multipart&fields=id`,
+      multipart({ name, mimeType: 'application/json', parents: [fid], appProperties: { app: 'classmanager-students' } }, '{"app":"classmanager-students","v":1,"s":{}}', 'application/json'));
+    try {
+      await request('POST', `${API}/files/${encodeURIComponent(res.id)}/permissions`, {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'reader', type: 'anyone', allowFileDiscovery: false })
+      });
+    } catch (e) {
+      await request('DELETE', `${API}/files/${encodeURIComponent(res.id)}`).catch(() => {});
+      throw new CloudError(e.code === 'network' ? 'network' : 'shareBlocked', e.message);
+    }
+    return { file: res.id };
+  }
+  async function studentsOff(file) {
+    try { await request('DELETE', `${API}/files/${encodeURIComponent(file)}`); } catch (e) { if (e.code !== 'notFound') throw e; }
+    lastPublished.delete(file);
+    return {};
+  }
+  // After each save: upload the students' entries again, if anything they can see has changed.
+  const lastPublished = new Map(); // file id → plain snapshots last uploaded from this page
+  let publishing = Promise.resolve(), pubState = null;
+  const pubStatus = { error: null, listeners: [] };
+  function publishStudents(state) {
+    if (!state || !state.studentView || !window.StudentData) return publishing;
+    const first = !pubState;
+    pubState = state;
+    if (first) publishing = publishing.then(async () => {
+      const st = pubState; pubState = null;
+      const file = st.studentView.file, plain = window.StudentData.plain(st);
+      if (lastPublished.get(file) === plain) return;
+      try {
+        await request('PATCH', `${UPLOAD}/files/${encodeURIComponent(file)}?uploadType=media&fields=id`, {
+          headers: { 'Content-Type': 'application/json' }, body: await window.StudentData.build(st)
+        });
+        lastPublished.set(file, plain);
+        setPubError(null);
+      } catch (e) { setPubError(e.code || 'server'); }
+    });
+    return publishing;
+  }
+  function setPubError(code) {
+    if (pubStatus.error === code) return;
+    pubStatus.error = code;
+    pubStatus.listeners.forEach(fn => fn(code));
   }
 
   async function version(id) {
@@ -150,9 +204,15 @@
     if (action === 'create') return create(p.state);
     if (action === 'save') return save(p.id, p.state, p.version);
     if (action === 'version') return version(p.id);
+    if (action === 'studentsOn') return studentsOn(p.title);
+    if (action === 'studentsOff') return studentsOff(p.file);
+    if (action === 'publishStudents') return publishStudents(p.state);
     return Promise.reject(new CloudError('badAction'));
   }
 
 
-  window.Cloud = { enabled, api, lastClassId, rememberClassId, authErrorKey, CloudError };
+  window.Cloud = {
+    enabled, api, lastClassId, rememberClassId, authErrorKey, CloudError,
+    get publishError() { return pubStatus.error; }, onPublish: fn => pubStatus.listeners.push(fn)
+  };
 })();

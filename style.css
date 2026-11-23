@@ -494,3 +494,67 @@ ul.mlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 /* 安卓应用里的「支持作者」按钮 */
 .navbtn.support { color: #c2185b; }
 .navbtn.support[hidden] { display: none; }
+
+/* student view: teacher side */
+.svsec .btnrow { flex-wrap: wrap; }
+.svmodal .mdc { background: #fff; border: 1px solid var(--line); max-width: 380px; width: 100%; text-align: center; }
+.svmodal .mdc h3 { color: var(--ink); }
+.svqr svg { display: block; width: 100%; height: auto; }
+.svmodal .svqr { width: 220px; margin: 0 auto 8px; }
+.svurl { width: 100%; font-size: 12px; margin: 6px 0 10px; }
+.svmodal .mdbtns { flex-wrap: wrap; }
+.svprint { position: fixed; inset: 0; z-index: 2500; background: #fff; overflow: auto; }
+.svbar { position: sticky; top: 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.svbar .spacer { flex: 1; }
+.svcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; padding: 14px; }
+.svcard { display: flex; align-items: center; gap: 12px; border: 1px dashed #b9b2a6; border-radius: 10px; padding: 10px; break-inside: avoid; page-break-inside: avoid; }
+.svcard .svqr { width: 120px; flex: none; }
+.svinfo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.svinfo b { font-size: 20px; }
+.svinfo span { color: var(--muted); font-size: 14px; }
+.svinfo small { font-size: 11px; color: var(--muted); line-height: 1.4; }
+@media print {
+  body.svprinting { overflow: visible; height: auto; display: block; }
+  body.svprinting > :not(.svprint) { display: none !important; }
+  body.svprinting .svprint { position: static; overflow: visible; }
+  body.svprinting .svbar { display: none; }
+  body.svprinting .svcards { grid-template-columns: repeat(2, 1fr); padding: 0; }
+}
+
+/* student view: login.html */
+.stu-login { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.stu-login h3 { margin: 0; font-size: 17px; text-align: center; }
+.stu-login .hint { margin: 0; text-align: center; }
+.stu-login form { display: flex; gap: 6px; }
+.stu-login input { flex: 1; min-width: 0; }
+.stu-login .msg { margin: 0; }
+.stu-scan video { width: 100%; border-radius: 10px; background: #000; display: block; }
+.stu-login .navbtn { justify-content: center; }
+
+/* student view: student.html */
+.stu-main { flex: 1; display: flex; justify-content: center; padding: 16px; }
+#stuMain { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 12px; }
+.stu-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
+.stu-card h3 { margin: 0 0 8px; font-size: 15px; color: var(--muted); font-weight: 600; }
+.stu-center { text-align: center; }
+.stu-card.stu-center { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.stu-card .muted { font-size: 14px; }
+.stu-hello { text-align: center; }
+.stu-name { font-size: 26px; font-weight: 700; }
+.stu-roles { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+.stu-points { text-align: center; }
+.stu-big { font-size: 52px; font-weight: 800; color: var(--accent); line-height: 1.1; }
+.stu-gname { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+ul.stu-list, ul.stu-days { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.stu-list li, .stu-dhead { display: flex; align-items: center; gap: 8px; }
+.stu-list .spacer, .stu-dhead .spacer { flex: 1; }
+.stu-ic { font-size: 20px; }
+.stu-days li { border-top: 1px solid var(--line); padding-top: 6px; }
+.stu-days li:first-child { border-top: none; padding-top: 0; }
+.stu-dits { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.stu-books { display: flex; gap: 2px; font-size: 22px; margin-bottom: 6px; flex-wrap: wrap; }
+.stu-books span { filter: grayscale(1); opacity: .3; }
+.stu-books span.on { filter: none; opacity: 1; }
+.student-page .tools { margin-left: auto; }
+.student-page .top, .stu-main { flex: none; }
+.student-page { height: auto; min-height: 100%; }
