@@ -16,6 +16,12 @@ GitHub Actions（`.github/workflows/android.yml`）在 `android/` 有改动时�
 
 没有设置签名密钥时只产出 debug APK。
 
+在 `main` 上构建成功后，签名版会自动发布到 GitHub **Releases**（标签 `android-v版本号`）。手机上直接下载安装，不用解压：
+
+https://github.com/MrWengKB/ClassManager/releases/latest/download/ClassManager.apk
+
+同一个版本号重新构建会覆盖该版本的文件；要发新版本就把 `versionName` 和 `versionCode` 加大。
+
 ### 签名密钥 / Signing key (GitHub secrets)
 
 在仓库 Settings → Secrets and variables → Actions 新增：

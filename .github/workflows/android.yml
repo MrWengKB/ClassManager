@@ -7,6 +7,9 @@ on:
       - '.github/workflows/android.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -59,3 +62,36 @@ jobs:
         with:
           name: class-manager-apk
           path: android/app/build/outputs/apk/**/*.apk
+
+      # Publish the signed APK (and AAB) as a GitHub Release, so it can be downloaded
+      # directly on a phone without unzipping. Only from main, only when signed.
+      # Stable link: https://github.com/MrWengKB/ClassManager/releases/latest/download/ClassManager.apk
+      - name: Prepare release files
+        if: env.CM_KEYSTORE_FILE != '' && github.ref == 'refs/heads/main'
+        run: |
+          VERSION=$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' android/app/build.gradle.kts)
+          CODE=$(sed -n 's/.*versionCode = \([0-9]*\).*/\1/p' android/app/build.gradle.kts)
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "APP_CODE=$CODE" >> "$GITHUB_ENV"
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/*.apk dist/ClassManager.apk
+          cp android/app/build/outputs/bundle/release/*.aab dist/ClassManager.aab
+
+      - name: Publish GitHub Release
+        if: env.CM_KEYSTORE_FILE != '' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v${{ env.APP_VERSION }}
+          target_commitish: ${{ github.sha }}
+          name: Class Manager Android ${{ env.APP_VERSION }} (build ${{ env.APP_CODE }})
+          body: |
+            在安卓手机上下载 **ClassManager.apk** 直接安装（覆盖旧版即可）。
+            Download **ClassManager.apk** on an Android phone and install it.
+
+            `ClassManager.aab` 是上传 Google Play 用的。 / `ClassManager.aab` is for uploading to Google Play.
+
+            Built from ${{ github.sha }}.
+          files: |
+            dist/ClassManager.apk
+            dist/ClassManager.aab
+          make_latest: true
