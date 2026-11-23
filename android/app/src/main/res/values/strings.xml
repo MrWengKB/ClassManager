@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Class Manager</string>
-    <string name="launch_url" translatable="false">https://mrwengkb.github.io/ClassManager/index.html</string>
+    <string name="launch_url" translatable="false">https://mrwengkb.github.io/ClassManager/index.html?app=android</string>
     <string name="asset_statements" translatable="false">
         [{
             \"relation\": [\"delegate_permission/common.handle_all_urls\"],
@@ -11,4 +11,7 @@
             }
         }]
     </string>
+    <string name="ad_loading">Loading ad… Thank you for your support!</string>
+    <string name="ad_thanks">Thank you for supporting Class Manager!</string>
+    <string name="ad_unavailable">No ad available right now. Please try again later.</string>
 </resources>

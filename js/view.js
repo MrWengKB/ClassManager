@@ -20,6 +20,8 @@
     $('#btnPrint span').textContent = t('print');
     $('#lnkAdmin span').textContent = t('adminLink');
     $('#lnkReading span').textContent = t('readTitle');
+    $('#lnkSupport span').textContent = t('support');
+    $('#lnkSupport').title = t('supportTip');
     $('#zoomOut').title = t('zoomOut'); $('#zoomIn').title = t('zoomIn'); $('#zoomFit').textContent = t('zoomFit');
     $('#zoomVal').textContent = Math.round(ui.zoom * 100) + '%';
     const needSignIn = Cloud.enabled && !window.Auth.current();

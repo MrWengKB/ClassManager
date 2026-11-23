@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ad_loading">Memuatkan iklan… Terima kasih atas sokongan anda!</string>
+    <string name="ad_thanks">Terima kasih kerana menyokong Class Manager!</string>
+    <string name="ad_unavailable">Tiada iklan buat masa ini. Sila cuba lagi kemudian.</string>
+</resources>

@@ -22,8 +22,8 @@ android {
         minSdk = 23
         targetSdk = 36
         // Bump both for every upload to Play (versionCode must always go up).
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     signingConfigs {
@@ -52,4 +52,5 @@ android {
 
 dependencies {
     implementation("com.google.androidbrowserhelper:androidbrowserhelper:2.5.0")
+    implementation("com.google.android.gms:play-services-ads:24.4.0")
 }

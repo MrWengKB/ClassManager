@@ -490,3 +490,7 @@ ul.mlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .mdetail .rbooks { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
 .mdetail .rbk { width: 100%; height: 30px; }
 .mread > li.open { background: #fffaf0; }
+
+/* 安卓应用里的「支持作者」按钮 */
+.navbtn.support { color: #c2185b; }
+.navbtn.support[hidden] { display: none; }
