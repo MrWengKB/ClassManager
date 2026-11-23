@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Google's official TEST IDs. Replace both with your own from admob.google.com before release. -->
-    <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
-    <string name="admob_rewarded_unit" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+    <!-- AdMob app and rewarded ad unit ("Support" button). -->
+    <string name="admob_app_id" translatable="false">ca-app-pub-7153891673892950~1078544183</string>
+    <string name="admob_rewarded_unit" translatable="false">ca-app-pub-7153891673892950/1544401860</string>
 </resources>

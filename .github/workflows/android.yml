@@ -42,7 +42,7 @@ jobs:
         run: |
           chmod +x gradlew
           if [ -n "$CM_KEYSTORE_FILE" ]; then
-            ./gradlew --no-daemon bundleRelease assembleRelease
+            ./gradlew --no-daemon bundleRelease assembleRelease assembleDebug
           else
             ./gradlew --no-daemon assembleDebug
           fi
