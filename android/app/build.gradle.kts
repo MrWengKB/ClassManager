@@ -19,11 +19,11 @@ android {
 
     defaultConfig {
         applicationId = "io.github.mrwengkb.classmanager"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         // Bump both for every upload to Play (versionCode must always go up).
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.3.1"
     }
 
     signingConfigs {
