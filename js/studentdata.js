@@ -68,6 +68,7 @@
 
   /* ---------- what a student sees ---------- */
   // Names of built-in items / roles / groups are sent as keys, and translated on the student's page.
+  const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const itemOf = (it, v) => ({ i: it.icon, k: it.key || '', n: it.name || '', c: v[0], p: v[1] });
   function snapshot(st, sid) {
     const P = window.Points, R = window.Reading;
@@ -99,10 +100,18 @@
     }
     const r = R.get(st, sid);
     const from = new Date(); from.setDate(from.getDate() - 70);
-    const cut = `${from.getFullYear()}-${String(from.getMonth() + 1).padStart(2, '0')}-${String(from.getDate()).padStart(2, '0')}`;
+    const cut = ymd(from);
     const rdays = {};
     Object.keys(r.days || {}).forEach(d => { if (d >= cut) rdays[d] = r.days[d]; });
     out.rd = { r: r.rounds, p: r.progress, rb: R.RB, days: rdays };
+    // announcements / homework that have not ended: the student's page shows the ones valid on its own today
+    const now = ymd(new Date());
+    // only those for the whole class, this student's group, or this student
+    const myGroup = desk ? desk.groupId : null;
+    out.nt = (st.notices || []).filter(n => !n.to || n.to >= now)
+      .filter(n => n.aud === 'groups' ? !!myGroup && n.groups.includes(myGroup) : n.aud === 'students' ? n.students.includes(sid) : true)
+      .sort((a, b) => (b.from || '').localeCompare(a.from || '') || (b.at || '').localeCompare(a.at || ''))
+      .slice(0, 30).map(n => ({ y: n.type, t: n.title, b: n.body, f: n.from, e: n.to }));
     return out;
   }
   // The plain snapshots (to notice when nothing changed) and the file to upload.

@@ -34,6 +34,7 @@
 - **离线使用**：管理页右上角可以下载整个网站的 zip，解压后打开 `index.html` 即可。
 - **手机版**：手机屏幕会自动显示简化版：学生和小组列表（点名字加分）、幸运抽选；阅读打卡每人一个「+」按钮。浏览器选「桌面版网站」就显示完整版。
 - **学生端**：在管理页「名单」分页开启后，可以打印每个学生的二维码卡片。学生用手机或平板相机扫码就能看到自己的分数、排名、小组和阅读进度，不需要 Google 账号，只能看、不能改。每次保存时，网站会在 Drive 里更新一个「知道链接的人可查看」的文件，里面每个学生的资料都用他自己的密钥单独加密，没有那张卡片就看不到其他同学的资料。卡片丢了可以换新码，关闭学生端后所有卡片都会失效。
+- **通知 / 作业**：在管理页「通知作业」分页发布通知或作业，支持纯文本和简单 Markdown，输入框有粗体、斜体、下划线、链接和列表按钮，可以预览。每条可设定有效日期（或长期有效），并选择发给全班、某些小组（勾选）或某些学生（下拉勾选）。学生在自己的学生端页面上只看到发给自己、当天有效的内容。
 - **四种界面语言**：页面右上角可以切换华文、English、Melayu、தமிழ்。
 
 ### 部署
@@ -61,6 +62,7 @@ Class Manager is a classroom management website for teachers. Lay out the desks,
 - **Multiple classes**: switch classes from the menu at the top, start a new class, or use **Export Excel** to get a workbook with sheets for students, point items, points by date and reading. It is also a full backup: **Import** on the Manage page restores it.
 - **Desk layout**: place single desks or groups of 4 or 6 on an empty floor. Drag, box-select, duplicate (Ctrl+D) and delete them, or generate whole rows at once. Select desks to make a group, and double-click a group name to rename it.
 - **Student view**: turn it on in Manage → Class list, then print a QR card for each student. Students scan it with a phone or tablet camera to see their own points, rank, group and reading, with no Google account and no way to change anything. On each save the site updates one file in Drive that anyone with the link can read; each student's entry in it is encrypted with that student's own key, so without their card nobody can read another student's details. A lost card can be given a new code, and turning the student view off makes every card stop working.
+- **Notices and homework**: post a notice or homework on the Notices tab of the Manage page, in plain text or simple Markdown, with Bold / Italic / Underline / Link / List buttons and a preview. Each post has the days it is valid (or no end date) and is for the whole class, ticked groups or chosen students. On the student page, each student sees only the posts meant for them that are valid today.
 - **Class list import**: paste text or choose a `.txt`, `.csv` or `.xlsx` file, one student per line. Gender can go after a comma or tab (`M/F`, `男/女`, `L/P`, `ஆண்/பெண்` and so on).
 - **Seating**: assign seats randomly or balance boys and girls. Add conditions such as "A must not sit next to B" or "A and B must not be in the same group". You can also arrange seats by hand with drag and drop.
 - **Roles**: group leader and class monitor are built in, and you can add, rename or delete your own roles.
@@ -106,6 +108,7 @@ Class Manager ialah laman web pengurusan kelas untuk guru. Susun meja, import se
 - **Cabutan bertuah**: tiga butang di sebelah kiri hadapan kelas: Kelas, Lelaki dan Perempuan. Setiap orang dalam kumpulan itu dicabut sekali sebelum ada yang berulang, dan meja murid yang terpilih diserlahkan.
 - **Pemasa**: di sebelah kanan hadapan kelas. Pilih tempoh sedia ada atau tetapkan sendiri, dengan jeda dan +1 minit. Pemasa terus berjalan walaupun tetingkap ditutup, dan berbunyi apabila masa tamat.
 - **Rekod bacaan**: menggunakan senarai kelas yang sama. Tekan buku untuk merekod, dan 10 buku = 1 pusingan. Ada statistik mingguan dan bulanan serta kedudukan bacaan. Bacaan dikira berasingan dan tidak termasuk dalam mata.
+- **Notis dan kerja rumah**: siarkan notis atau kerja rumah di tab Notis halaman Urus, dalam teks biasa atau Markdown ringkas, dengan butang Tebal / Condong / Garis bawah / Pautan / Senarai dan pratonton. Setiap siaran ada tarikh sah (atau tiada tarikh tamat) dan untuk seluruh kelas, kumpulan atau murid yang dipilih. Di halaman murid, setiap murid hanya melihat siaran untuk mereka yang sah hari ini.
 - **Cetak**: memuatkan seluruh kelas pada satu halaman melintang.
 - **Guna luar talian**: muat turun seluruh laman sebagai zip dari bahagian atas kanan halaman Urus, nyahzip dan buka `index.html`.
 - **Versi telefon**: telefon memaparkan susun atur ringkas: senarai murid dan kumpulan (tekan nama untuk memberi mata) dan cabutan bertuah; di rekod bacaan setiap murid ada butang +. Pilih "Laman desktop" dalam pelayar untuk versi penuh.
@@ -143,6 +146,7 @@ Class Manager என்பது ஆசிரியர்களுக்கா�
 - **அதிர்ஷ்டத் தேர்வு**: வகுப்பின் முன்பக்கத்தின் இடப்பக்கத்தில் வகுப்பு, மாணவர், மாணவிகள் என மூன்று பொத்தான்கள். அந்தப் பிரிவில் அனைவரும் ஒருமுறை தேர்வான பிறகுதான் மீண்டும் யாரும் வருவார்கள். தேர்வான மாணவரின் மேசை முன்னிலைப்படுத்தப்படும்.
 - **நேரக் கணிப்பான்**: வகுப்பின் முன்பக்கத்தின் வலப்பக்கத்தில். முன்னமைக்கப்பட்ட நேரத்தைத் தேர்வு செய்யலாம் அல்லது நீங்களே அமைக்கலாம்; இடைநிறுத்தம், +1 நிமிடம் வசதிகளுடன். சாளரத்தை மூடினாலும் ஓடிக்கொண்டிருக்கும், நேரம் முடிந்ததும் ஒலிக்கும்.
 - **வாசிப்புப் பதிவு**: அதே வகுப்புப் பட்டியலைப் பயன்படுத்தும். புத்தகத்தை அழுத்திப் பதிவு செய்யலாம். 10 புத்தகங்கள் = 1 சுற்று. வாராந்திர, மாதாந்திரப் புள்ளிவிவரங்களும் வாசிப்புத் தரவரிசையும் உண்டு. வாசிப்பு தனியாகக் கணக்கிடப்படும், புள்ளிகளில் சேராது.
+- **அறிவிப்புகள், வீட்டுப்பாடம்**: நிர்வாகப் பக்கத்தின் அறிவிப்புகள் தாவலில் அறிவிப்பு அல்லது வீட்டுப்பாடத்தை சாதாரண உரை அல்லது எளிய Markdown-இல் வெளியிடலாம் (தடித்த / சாய்வு / அடிக்கோடு / இணைப்பு / பட்டியல் பொத்தான்கள், முன்னோட்டம்). ஒவ்வொரு பதிவுக்கும் செல்லுபடி நாட்களையும், முழு வகுப்பு, குழுக்கள் அல்லது தேர்ந்தெடுத்த மாணவர்களையும் அமைக்கலாம். மாணவர் பக்கத்தில் ஒவ்வொரு மாணவரும் தங்களுக்கான, இன்று செல்லுபடியாகும் பதிவுகளை மட்டும் காண்பார்கள்.
 - **அச்சிடுதல்**: முழு வகுப்பறையையும் ஒரு கிடைமட்டப் பக்கத்தில் அடக்கும்.
 - **இணையம் இல்லாமல் பயன்படுத்துதல்**: நிர்வாகப் பக்கத்தின் மேல் வலப்பக்கத்திலிருந்து முழுத் தளத்தையும் zip ஆகப் பதிவிறக்கி, பிரித்தெடுத்து `index.html`-ஐத் திறக்கலாம்.
 - **கைபேசிப் பதிப்பு**: கைபேசியில் எளிய அமைப்பு தானாகக் காட்டப்படும்: மாணவர், குழுப் பட்டியல்கள் (புள்ளி வழங்கப் பெயரைத் தட்டவும்), அதிர்ஷ்டத் தேர்வு; வாசிப்புப் பதிவில் ஒவ்வொரு மாணவருக்கும் + பொத்தான். முழுப் பதிப்புக்கு உலாவியில் "Desktop site" தேர்வு செய்யவும்.

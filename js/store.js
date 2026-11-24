@@ -8,7 +8,7 @@
     return [{ id: 'r_leader', key: 'leader', name: '' }, { id: 'r_monitor', key: 'monitor', name: '' }];
   }
   function blank() {
-    return { app: 'classmanager', version: 1, title: '', desks: [], groups: [], students: [], roles: defaultRoles(), constraints: [], pointItems: window.Points.defaults(), scores: {}, pointLog: [], pointDays: {}, reading: {} };
+    return { app: 'classmanager', version: 1, title: '', desks: [], groups: [], students: [], roles: defaultRoles(), constraints: [], pointItems: window.Points.defaults(), scores: {}, pointLog: [], pointDays: {}, reading: {}, notices: [] };
   }
 
   // Bring any loaded / mutated state into a consistent shape and drop dangling references.
@@ -44,6 +44,25 @@
     b.constraints = b.constraints.filter(c => c && sid.has(c.a) && sid.has(c.b) && c.a !== c.b && (c.type === 'adjacent' || c.type === 'group'));
     window.Points.normalize(b, s, sid);
     window.Reading.normalize(b, s, sid);
+    // announcements / homework (see notices.js)
+    const DAY = /^\d{4}-\d\d-\d\d$/;
+    b.notices = (Array.isArray(s.notices) ? s.notices : []).filter(n => n && typeof n.id === 'string' && n.id && (typeof n.body === 'string' || typeof n.title === 'string'))
+      .slice(0, 300).map(n => {
+        const from = typeof n.from === 'string' && DAY.test(n.from) ? n.from : '';
+        let to = typeof n.to === 'string' && DAY.test(n.to) ? n.to : '';
+        if (from && to && to < from) to = from;
+        // who it is for: the whole class, some groups or some students
+        const aud = n.aud === 'groups' || n.aud === 'students' ? n.aud : 'all';
+        const ids = (list, ok) => (Array.isArray(list) ? list : []).filter((x, i, a) => ok.has(x) && a.indexOf(x) === i);
+        return {
+          id: n.id, type: n.type === 'hw' ? 'hw' : 'notice', aud,
+          groups: aud === 'groups' ? ids(n.groups, gid) : [],
+          students: aud === 'students' ? ids(n.students, sid) : [],
+          title: typeof n.title === 'string' ? n.title.slice(0, 120) : '',
+          body: typeof n.body === 'string' ? n.body.slice(0, 5000) : '',
+          from, to, at: typeof n.at === 'string' ? n.at : ''
+        };
+      });
     // student view (see studentdata.js): the shared file and each student's secret key
     const sv = s.studentView;
     if (sv && typeof sv === 'object' && typeof sv.file === 'string' && /^[A-Za-z0-9_-]{10,}$/.test(sv.file)) {

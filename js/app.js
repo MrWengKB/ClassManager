@@ -21,7 +21,7 @@
   };
   try {
     const saved = JSON.parse((localStorage.getItem('classmanager:ui') || localStorage.getItem('paipaizuo:ui')) || '{}');
-    if (['layout', 'roster', 'assign', 'roles', 'points'].includes(saved.tab)) ui.tab = saved.tab;
+    if (['layout', 'roster', 'assign', 'roles', 'points', 'notices'].includes(saved.tab)) ui.tab = saved.tab;
     if (saved.method === 'gender') ui.method = 'gender';
   } catch (e) { /* ignore */ }
   function saveUi() { try { localStorage.setItem('classmanager:ui', JSON.stringify({ tab: ui.tab, method: ui.method })); } catch (e) { /* ignore */ } }
@@ -52,7 +52,7 @@
     $('#btnRedo').disabled = !Store.canRedo();
     document.querySelectorAll('.tab').forEach(b => {
       b.classList.toggle('active', b.dataset.tab === ui.tab);
-      b.querySelector('span').textContent = t({ layout: 'tabLayout', roster: 'tabRoster', assign: 'tabAssign', roles: 'tabRoles', points: 'tabPoints' }[b.dataset.tab]);
+      b.querySelector('span').textContent = t({ layout: 'tabLayout', roster: 'tabRoster', assign: 'tabAssign', roles: 'tabRoles', points: 'tabPoints', notices: 'tabNotices' }[b.dataset.tab]);
     });
     $('#zoomOut').title = t('zoomOut'); $('#zoomIn').title = t('zoomIn'); $('#zoomFit').textContent = t('zoomFit');
     $('#zoomVal').textContent = Math.round(ui.zoom * 100) + '%';
@@ -91,10 +91,18 @@
     else if (ui.tab === 'roster') h = sideRoster(st);
     else if (ui.tab === 'assign') h = sideAssign(st);
     else if (ui.tab === 'points') h = sidePoints(st);
+    else if (ui.tab === 'notices') h = window.NoticeAdmin.section(st);
     else h = sideRoles(st);
     const scroll = side.scrollTop;
+    // keep the cursor where it was when the sidebar is drawn again (e.g. while writing a notice)
+    const a = document.activeElement, focusId = a && side.contains(a) && a.id ? a.id : null;
+    const sel = focusId && /^(INPUT|TEXTAREA)$/.test(a.tagName) && typeof a.selectionStart === 'number' ? [a.selectionStart, a.selectionEnd] : null;
     side.innerHTML = h;
     side.scrollTop = scroll;
+    if (focusId) {
+      const el = document.getElementById(focusId);
+      if (el && side.contains(el)) { el.focus({ preventScroll: true }); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) { /* not a text box */ } }
+    }
   }
 
   function sideLayout(st) {
@@ -438,7 +446,7 @@
   side.addEventListener('click', e => {
     const b = e.target.closest('[data-act]');
     if (!b || b.disabled) return;
-    const fn = actions[b.dataset.act] || (window.StudentAdmin && window.StudentAdmin.actions[b.dataset.act]);
+    const fn = actions[b.dataset.act] || (window.StudentAdmin && window.StudentAdmin.actions[b.dataset.act]) || (window.NoticeAdmin && window.NoticeAdmin.actions[b.dataset.act]);
     if (fn) fn(b.dataset.id);
   });
   side.addEventListener('submit', e => {
@@ -463,12 +471,14 @@
     }
   });
   side.addEventListener('input', e => {
+    if (window.NoticeAdmin && window.NoticeAdmin.onInput(e)) return;
     const id = e.target.id;
     if (id === 'importText') ui.importText = e.target.value;
     else if (id === 'qRows') ui.rows = +e.target.value;
     else if (id === 'qCols') ui.cols = +e.target.value;
   });
   side.addEventListener('change', e => {
+    if (window.NoticeAdmin && window.NoticeAdmin.onInput(e)) return;
     const el = e.target;
     if (el.name === 'qArr') ui.pairs = el.value === 'pairs';
     else if (el.name === 'method') { ui.method = el.value; saveUi(); }
@@ -609,6 +619,7 @@
   });
   Store.subscribe(renderAll);
   if (window.StudentAdmin) window.StudentAdmin.init(renderSide);
+  if (window.NoticeAdmin) window.NoticeAdmin.init(renderSide, side);
   // Without Google Drive, the class view saves points in this browser too: pick them up here.
   if (!(window.CM_CONFIG && window.CM_CONFIG.useDrive)) {
     window.addEventListener('storage', e => {
