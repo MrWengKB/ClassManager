@@ -66,6 +66,16 @@
     let h = `<div class="stu-card stu-hello"><div class="stu-name">${esc(d.n)}</div>
       ${d.c ? `<div class="muted">${esc(d.c)}</div>` : ''}
       ${d.roles && d.roles.length ? `<div class="stu-roles">${d.roles.map(r => `<span class="badge">${esc(roleName(r))}</span>`).join('')}</div>` : ''}</div>`;
+    // notices / homework meant for this student and valid today
+    const N = window.Notices;
+    const nts = N && Array.isArray(d.nt) ? N.activeOn(d.nt.map(n => ({ type: n.y, title: n.t || '', body: n.b || '', from: n.f || '', to: n.e || '' }))) : [];
+    if (nts.length) {
+      const today = N.today();
+      h += `<div class="stu-card"><h3>📢 ${esc(t('stuNotices'))}</h3><ul class="stu-nts">${nts.map(n => `<li>
+        <div class="stu-nthead"><span class="ntbadge ${n.type === 'hw' ? 'hw' : ''}">${n.type === 'hw' ? '📝 ' + esc(t('ntHomework')) : '📢 ' + esc(t('ntNotice'))}</span>${n.title ? `<b>${esc(n.title)}</b>` : ''}</div>
+        ${n.body ? `<div class="md">${N.render(n.body)}</div>` : ''}
+        ${n.to ? `<div class="stu-ntdue">⏰ ${esc(n.to === today ? t('stuDueToday') : t('stuDueOn', { d: dateLabel(n.to) }))}</div>` : ''}</li>`).join('')}</ul></div>`;
+    }
     h += `<div class="stu-card stu-points"><h3>⭐ ${esc(t('stuPoints'))}</h3><div class="stu-big">${d.pts}</div>
       ${d.of > 1 ? `<div class="muted">${esc(t('stuRank', { r: d.rank, n: d.of }))}</div>` : ''}</div>`;
     if (d.g) {
