@@ -436,6 +436,7 @@
     stuNotices: ['Notices & homework', '通知、作业和提醒', 'Notis & kerja rumah', 'அறிவிப்புகள் & வீட்டுப்பாடம்'],
     stuDueOn: ['Until {d}', '截止 {d}', 'Hingga {d}', '{d} வரை'],
     stuDueToday: ['Today only', '仅限今天', 'Hari ini sahaja', 'இன்று மட்டும்'],
+    newVersion: ['🔄 New version: tap to update', '🔄 有新版本，点此更新', '🔄 Versi baharu: ketik untuk kemas kini', '🔄 புதிய பதிப்பு: புதுப்பிக்கத் தட்டவும்'],
     cancel: ['Cancel', '取消', 'Batal', 'ரத்து'],
     ok: ['OK', '确定', 'OK', 'சரி']
   };
