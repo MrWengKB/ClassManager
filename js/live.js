@@ -14,6 +14,7 @@
   let onOpen = () => {};
 
   function applyDelta(state, d) {
+    if (d.type === 'hw') return window.Notices.apply(state, d);
     return d.type === 'read' ? window.Reading.apply(state, d) : window.Points.apply(state, d);
   }
 

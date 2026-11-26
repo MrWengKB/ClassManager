@@ -1,6 +1,7 @@
 /* Class Manager · 班级 ⇄ 试算表（Google Sheet / Excel）
  * One workbook per class. Tabs anyone can read, and some they can edit:
  *   Students 学生 / Items 加分项目 / Roles 职务 / Reading 阅读   → edits are read back
+ *   Homework 作业 (only when there is homework): one column per homework, ✓ = handed in → read back
  *   Points by date 每日加分 / About 说明                           → for reading only
  *   _data (hidden)  the whole class as JSON, for everything the tabs don't hold (layout, seats, logs…)
  * Reading a workbook starts from _data and then applies what the editable tabs say.
@@ -9,13 +10,15 @@
 (function () {
   const { t } = window.I18n;
   const en = (k, v) => window.I18n.tIn('en', k, v);
-  const TAB = { about: 'About', students: 'Students', items: 'Items', roles: 'Roles', reading: 'Reading', daily: 'Points by date', data: '_data' };
+  const TAB = { about: 'About', students: 'Students', items: 'Items', roles: 'Roles', reading: 'Reading', homework: 'Homework', daily: 'Points by date', data: '_data' };
+  const CLOSED = ' [closed]';
   const CHUNK = 30000;
   const ABOUT = [
     ['Class Manager'],
-    ['You can edit the tabs Students, Items, Roles and Reading here. Class Manager reads the changes the next time it opens the class.'],
+    ['You can edit the tabs Students, Items, Roles, Reading and Homework here. Class Manager reads the changes the next time it opens the class.'],
     ['• Add a row to add (leave ID empty). Delete a row to remove.'],
     ['• Gender: M / F. Roles: names separated by commas. Group item: Y / N.'],
+    ['• Homework: one column per homework. ✓ (or anything) = handed in, empty = not yet, — = not for this student. Add or remove “ [closed]” after a title to close or reopen it.'],
     ['• Columns marked (read only) and the other tabs are not read back.'],
     ['• Do not edit or delete the hidden tab _data.']
   ];
@@ -62,6 +65,15 @@
     tabs.push([TAB.roles, [['ID', 'Name']].concat(st.roles.map(r => [r.id, roleName(r)])), [14, 20]]);
     tabs.push([TAB.reading, [['ID', 'Name (read only)', 'Rounds', 'This round (0-' + (R.RB - 1) + ')', 'Total books (read only)', 'This week (read only)']]
       .concat(st.students.map(s => { const r = R.get(st, s.id); return [s.id, s.name, r.rounds, r.progress, R.total(st, s.id), R.since(st, s.id, wk)]; })), [12, 18, 10, 14, 14, 14]]);
+    const N = window.Notices, hws = N ? N.homework(st) : [];
+    if (hws.length) {
+      const who = hws.map(n => new Set(N.members(st, n)));
+      const rows = [['ID', 'Name (read only)'].concat(hws.map(n => (n.title || N.plainText(n.body).slice(0, 40) || 'Homework') + (n.closed ? CLOSED : ''))),
+        ['Homework ID (do not edit)', ''].concat(hws.map(n => n.id))];
+      st.students.forEach(s => rows.push([s.id, s.name].concat(hws.map((n, j) => (!who[j].has(s.id) ? '—' : N.handedIn(n, s.id) ? '✓' : '')))));
+      rows.push(['', 'Handed in (read only)'].concat(hws.map((n, j) => [...who[j]].filter(id => N.handedIn(n, id)).length + ' / ' + who[j].size)));
+      tabs.push([TAB.homework, rows, [12, 18].concat(hws.map(() => 16))]);
+    }
     const byId = new Map(st.students.map(s => [s.id, s]));
     const daily = [['Date', 'Name', 'Item', 'Times', 'Points']];
     P.days(st).forEach(d => Object.keys(st.pointDays[d]).forEach(sid => Object.keys(st.pointDays[d][sid]).forEach(iid => {
@@ -147,7 +159,46 @@
         st.reading[sid] = Object.assign({}, cur, { rounds, progress });
       });
     }
+    const hwTab = tabOf(wb, TAB.homework);
+    if (hwTab && Array.isArray(st.notices)) readHomework(XLSX.utils.sheet_to_json(hwTab, { header: 1, raw: true, defval: '' }), st);
     return st;
+  }
+
+  // the Homework tab: titles (with “ [closed]”) in row 1, homework IDs in row 2, then one row per student
+  const NOT_IN = ['', '-', '—', '–', 'x', '✗', '✘', '×', 'n', 'no', 'false', '0', '否', '未交', '没交', 'tidak', 'belum', 'இல்லை'];
+  function cellDay(v) {
+    if (typeof v === 'number' && v > 30000 && v < 80000) { const d = new Date(Math.round((v - 25569) * 86400000)); return d.toISOString().slice(0, 10); }
+    const m = str(v).match(/\d{4}-\d\d-\d\d/);
+    return m ? m[0] : '';
+  }
+  function readHomework(rows, st) {
+    if (rows.length < 2) return;
+    const ids = rows[1].map(str);
+    const today = (window.Notices ? window.Notices.today : () => new Date().toISOString().slice(0, 10))();
+    const sids = new Set(st.students.map(s => s.id));
+    ids.forEach((hid, j) => {
+      if (j < 2 || !hid) return;
+      const n = st.notices.find(x => x && x.id === hid && x.type === 'hw');
+      if (!n) return;
+      const head = str(rows[0][j]);
+      if (head) {
+        n.closed = /\[closed\]\s*$/i.test(head);
+        const title = head.replace(/\s*\[closed\]\s*$/i, '').trim();
+        const was = (n.title || (window.Notices ? window.Notices.plainText(n.body).slice(0, 40) : '') || 'Homework').trim();
+        if (title && title !== was) n.title = title.slice(0, 120);
+      }
+      const subs = n.subs && typeof n.subs === 'object' ? n.subs : {};
+      rows.slice(2).forEach(r => {
+        const sid = str(r[0]);
+        if (!sids.has(sid)) return;
+        const v = r[j], s = str(v);
+        if (s === '—') return; // not for this student
+        const done = typeof v === 'boolean' ? v : !NOT_IN.includes(s.toLowerCase());
+        if (done && !Object.prototype.hasOwnProperty.call(subs, sid)) subs[sid] = cellDay(v) || today;
+        else if (!done) delete subs[sid];
+      });
+      n.subs = subs;
+    });
   }
 
   const norm = st => (window.Store ? window.Store.normalize(st) : st);

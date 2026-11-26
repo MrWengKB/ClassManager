@@ -68,11 +68,13 @@
       ${d.roles && d.roles.length ? `<div class="stu-roles">${d.roles.map(r => `<span class="badge">${esc(roleName(r))}</span>`).join('')}</div>` : ''}</div>`;
     // notices / homework meant for this student and valid today
     const N = window.Notices;
-    const nts = N && Array.isArray(d.nt) ? N.activeOn(d.nt.map(n => ({ type: n.y, title: n.t || '', body: n.b || '', from: n.f || '', to: n.e || '' }))) : [];
+    const nts = N && Array.isArray(d.nt) ? N.activeOn(d.nt.map(n => ({ type: n.y, title: n.t || '', body: n.b || '', from: n.f || '', to: n.e || '', h: n.h, x: n.x }))) : [];
+    const badge = y => ({ hw: '📝 ' + esc(t('ntHomework')), remind: '⏰ ' + esc(t('ntRemind')) }[y] || '📢 ' + esc(t('ntNotice')));
     if (nts.length) {
       const today = N.today();
       h += `<div class="stu-card"><h3>📢 ${esc(t('stuNotices'))}</h3><ul class="stu-nts">${nts.map(n => `<li>
-        <div class="stu-nthead"><span class="ntbadge ${n.type === 'hw' ? 'hw' : ''}">${n.type === 'hw' ? '📝 ' + esc(t('ntHomework')) : '📢 ' + esc(t('ntNotice'))}</span>${n.title ? `<b>${esc(n.title)}</b>` : ''}</div>
+        <div class="stu-nthead"><span class="ntbadge ${n.type === 'notice' ? '' : esc(n.type)}">${badge(n.type)}</span>${n.title ? `<b>${esc(n.title)}</b>` : ''}
+          ${n.type === 'hw' && n.h !== undefined ? `<span class="ntbadge ${n.h ? 'done' : 'todo'}">${esc(t(n.h ? 'stuHwDone' : 'stuHwNotYet'))}</span>` : ''}</div>
         ${n.body ? `<div class="md">${N.render(n.body)}</div>` : ''}
         ${n.to ? `<div class="stu-ntdue">⏰ ${esc(n.to === today ? t('stuDueToday') : t('stuDueOn', { d: dateLabel(n.to) }))}</div>` : ''}</li>`).join('')}</ul></div>`;
     }

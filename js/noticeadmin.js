@@ -1,4 +1,5 @@
-/* Class Manager · 管理页：通知 / 作业分页
+/* Class Manager · 管理页：通知 / 作业 / 提醒分页
+ * Homework also gets a list under the editor: rename, clear the hand-ins, close (no more hand-ins), delete.
  * Write a notice or homework (plain text + simple Markdown, with a small B / I / U / link toolbar),
  * choose the days it is valid and who it is for (whole class, some groups, some students).
  * Students see the posts meant for them that are valid today on their own page (student.html).
@@ -15,6 +16,9 @@
   let msg = null;
   const open = { upcoming: true, ended: false };
 
+  const TYPES = ['notice', 'hw', 'remind'];
+  const badgeText = k => ({ notice: '📢 ' + esc(t('ntNotice')), hw: '📝 ' + esc(t('ntHomework')), remind: '⏰ ' + esc(t('ntRemind')) }[k] || '');
+  const hwOpen = new Set(); // homework whose hand-in list is unfolded
   const groupLabel = g => window.Layout ? window.Layout.groupName(g, Store.state) : (g.name || t('groupN', { n: Store.state.groups.indexOf(g) + 1 }));
   function dateLabel(day) {
     if (!day) return '';
@@ -50,10 +54,11 @@
   }
   function editor(st) {
     let h = `<section class="ntsec"><h3>${d.editing ? '✎ ' + esc(t('ntEditTitle')) : '📢 ' + esc(t('ntNewTitle'))}</h3>
-      <div class="seg" role="radiogroup">
-        <label class="${d.type === 'notice' ? 'on' : ''}"><input type="radio" name="ntType" value="notice" ${d.type === 'notice' ? 'checked' : ''}>📢 ${esc(t('ntNotice'))}</label>
-        <label class="${d.type === 'hw' ? 'on' : ''}"><input type="radio" name="ntType" value="hw" ${d.type === 'hw' ? 'checked' : ''}>📝 ${esc(t('ntHomework'))}</label>
+      <h4>🏷 ${esc(t('ntType'))}</h4>
+      <div class="seg" role="radiogroup" aria-label="${esc(t('ntType'))}">
+        ${TYPES.map(k => `<label class="${d.type === k ? 'on' : ''}"><input type="radio" name="ntType" value="${k}" ${d.type === k ? 'checked' : ''}>${badgeText(k)}</label>`).join('')}
       </div>
+      ${d.type === 'hw' ? `<p class="hint small">${esc(t('hwTypeHint'))}</p>` : ''}
       <input id="ntTitle" class="nttitle" maxlength="120" autocomplete="off" placeholder="${esc(t('ntTitlePh'))}" value="${esc(d.title)}">
       <div class="nttools" role="toolbar" aria-label="${esc(t('ntToolbar'))}">
         <button type="button" class="nttool" data-act="ntFmt" data-id="b" title="${esc(t('ntBold'))} (Ctrl B)"><b>B</b></button>
@@ -108,7 +113,7 @@
   function card(n, st) {
     const s = N.status(n);
     return `<li class="ntcard ${s} ${n.type}${d.editing === n.id ? ' editing' : ''}">
-      <div class="nthead"><span class="ntbadge ${n.type}">${n.type === 'hw' ? '📝 ' + esc(t('ntHomework')) : '📢 ' + esc(t('ntNotice'))}</span>
+      <div class="nthead"><span class="ntbadge ${n.type}">${badgeText(n.type)}</span>${n.type === 'hw' && n.closed ? `<span class="ntbadge closed">${esc(t('hwClosed'))}</span>` : ''}
         <b class="ntt">${esc(n.title || N.plainText(n.body).slice(0, 40) || '—')}</b><span class="spacer"></span>
         <button class="icon" data-act="ntEdit" data-id="${esc(n.id)}" title="${esc(t('ntEdit'))}">✎</button>
         <button class="icon" data-act="ntCopy" data-id="${esc(n.id)}" title="${esc(t('ntCopy'))}">⧉</button>
@@ -134,7 +139,35 @@
     return h + '</section>';
   }
 
-  const section = st => editor(st) + listing(st);
+  /* ---------- homework list: rename, clear hand-ins, close, delete ---------- */
+  function hwList(st) {
+    const list = N.homework(st).reverse();
+    let h = `<section class="hwsec"><h3>📝 ${esc(t('hwListTitle'))}</h3>`;
+    if (!list.length) return h + `<p class="hint small">${esc(t('hwNone'))}</p></section>`;
+    h += `<p class="hint small">${esc(t('hwSheetHint'))}</p><ul class="hwlist">`;
+    const byId = new Map(st.students.map(x => [x.id, x]));
+    list.sort((a, b) => (a.closed ? 1 : 0) - (b.closed ? 1 : 0)).forEach(n => {
+      const who = N.members(st, n), done = who.filter(id => N.handedIn(n, id));
+      const pct = who.length ? Math.round(done.length / who.length * 100) : 0;
+      h += `<li class="hwrow${n.closed ? ' closed' : ''}">
+        <div class="hwtop"><input class="hwtitle" id="hwt_${esc(n.id)}" data-hwtitle="${esc(n.id)}" maxlength="120" value="${esc(n.title)}" placeholder="${esc(N.plainText(n.body).slice(0, 40) || t('ntHomework'))}" aria-label="${esc(t('hwRename'))}">
+          ${n.closed ? `<span class="ntbadge closed">${esc(t('hwClosed'))}</span>` : ''}</div>
+        <div class="hwbar" title="${done.length} / ${who.length}"><span style="width:${pct}%"></span></div>
+        <div class="hwmeta"><button type="button" class="link" data-act="hwToggleList" data-id="${esc(n.id)}" aria-expanded="${hwOpen.has(n.id)}">${hwOpen.has(n.id) ? '▾' : '▸'} ${esc(t('hwCount', { k: done.length, n: who.length }))}</button><span class="spacer"></span>
+          <button type="button" class="icon" data-act="hwClear" data-id="${esc(n.id)}" title="${esc(t('hwClear'))}" ${done.length ? '' : 'disabled'}>🧹</button>
+          <button type="button" class="icon" data-act="hwClose" data-id="${esc(n.id)}" title="${esc(t(n.closed ? 'hwReopen' : 'hwClose'))}">${n.closed ? '🔓' : '🔒'}</button>
+          <button type="button" class="icon danger" data-act="ntDel" data-id="${esc(n.id)}" title="${esc(t('hwDelete'))}">✕</button></div>`;
+      if (hwOpen.has(n.id)) {
+        h += who.length ? `<div class="ntchecks hwsubs">${who.map(id => byId.get(id)).filter(Boolean).map(x =>
+          `<label class="check${N.handedIn(n, x.id) ? ' on' : ''}"><input type="checkbox" data-hwsub="${esc(n.id)}" data-sid="${esc(x.id)}" ${N.handedIn(n, x.id) ? 'checked' : ''} ${n.closed ? 'disabled' : ''}> ${esc(x.name)}</label>`).join('')}</div>`
+          : `<p class="hint small">${esc(t('ntNobody'))}</p>`;
+      }
+      h += '</li>';
+    });
+    return h + '</ul></section>';
+  }
+
+  const section = st => editor(st) + hwList(st) + listing(st);
 
   /* ---------- editing the text ---------- */
   function updatePreview() {
@@ -233,6 +266,13 @@
       const n = Store.state.notices.filter(x => N.status(x) === 'ended').length;
       if (n && confirm(t('ntConfirmClear', { n }))) Store.commit(st => { st.notices = st.notices.filter(x => N.status(x) !== 'ended'); });
     },
+    hwToggleList: id => { if (hwOpen.has(id)) hwOpen.delete(id); else hwOpen.add(id); rerender(); },
+    hwClear: id => {
+      const n = Store.state.notices.find(x => x.id === id); if (!n) return;
+      if (!confirm(t('hwConfirmClear', { name: n.title || N.plainText(n.body).slice(0, 30) }))) return;
+      Store.commit(st => { const x = st.notices.find(v => v.id === id); if (x) x.subs = {}; });
+    },
+    hwClose: id => Store.commit(st => { const x = st.notices.find(v => v.id === id); if (x) x.closed = !x.closed; }),
     ntPickAll: () => { const q = d.pickQ.toLowerCase(); Store.state.students.forEach(s => { if ((!q || s.name.toLowerCase().includes(q)) && !d.students.includes(s.id)) d.students.push(s.id); }); rerender(); },
     ntPickNone: () => { d.students = []; rerender(); },
     ntUnpick: id => { d.students = d.students.filter(x => x !== id); rerender(); }
@@ -243,6 +283,18 @@
     const el = e.target;
     if (el.id === 'ntBody') { d.body = el.value; return true; }
     if (el.id === 'ntTitle') { d.title = el.value; return true; }
+    if (el.dataset.hwtitle) {
+      if (e.type !== 'change') return true;
+      const id = el.dataset.hwtitle, v = el.value.trim().slice(0, 120);
+      Store.commit(st => { const x = st.notices.find(n => n.id === id); if (x) x.title = v; });
+      if (d.editing === id) d.title = v;
+      return true;
+    }
+    if (el.dataset.hwsub) {
+      const id = el.dataset.hwsub, sid = el.dataset.sid, on = el.checked;
+      Store.commit(st => N.apply(st, { n: id, s: [sid], on }));
+      return true;
+    }
     if (el.id === 'ntPickQ') {
       d.pickQ = el.value;
       const q = el.value.trim().toLowerCase();
@@ -275,6 +327,7 @@
     else if (el.dataset && el.dataset.ntsec) open[el.dataset.ntsec] = el.open;
   }
   function onKey(e) {
+    if (e.target.dataset && e.target.dataset.hwtitle && e.key === 'Enter') { e.preventDefault(); e.target.blur(); return; }
     if (e.target.id !== 'ntBody' || !(e.ctrlKey || e.metaKey) || e.altKey) return;
     const k = e.key.toLowerCase(), map = { b: 'b', i: 'i', u: 'u', k: 'link' };
     if (!map[k]) return;

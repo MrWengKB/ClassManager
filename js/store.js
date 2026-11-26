@@ -54,14 +54,22 @@
         // who it is for: the whole class, some groups or some students
         const aud = n.aud === 'groups' || n.aud === 'students' ? n.aud : 'all';
         const ids = (list, ok) => (Array.isArray(list) ? list : []).filter((x, i, a) => ok.has(x) && a.indexOf(x) === i);
-        return {
-          id: n.id, type: n.type === 'hw' ? 'hw' : 'notice', aud,
+        const out = {
+          id: n.id, type: n.type === 'hw' || n.type === 'remind' ? n.type : 'notice', aud,
           groups: aud === 'groups' ? ids(n.groups, gid) : [],
           students: aud === 'students' ? ids(n.students, sid) : [],
           title: typeof n.title === 'string' ? n.title.slice(0, 120) : '',
           body: typeof n.body === 'string' ? n.body.slice(0, 5000) : '',
           from, to, at: typeof n.at === 'string' ? n.at : ''
         };
+        // homework: closed = no more hand-ins; subs = { studentId: 'YYYY-MM-DD' handed in }
+        if (out.type === 'hw') {
+          out.closed = !!n.closed;
+          out.subs = {};
+          const subs = n.subs && typeof n.subs === 'object' ? n.subs : {};
+          Object.keys(subs).forEach(id => { if (sid.has(id)) out.subs[id] = typeof subs[id] === 'string' && DAY.test(subs[id]) ? subs[id] : ''; });
+        }
+        return out;
       });
     // student view (see studentdata.js): the shared file and each student's secret key
     const sv = s.studentView;

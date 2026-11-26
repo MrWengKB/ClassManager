@@ -1,4 +1,4 @@
-/* Class Manager · 班级一览：显示“管理”里最后确定的结果；点学生座位可以加分 */
+/* Class Manager · 班级一览：显示“管理”里最后确定的结果；点学生座位或小组：加分、记录作业提交 */
 (function () {
   const { t } = window.I18n;
   const Store = window.Store, Layout = window.Layout;
@@ -173,35 +173,85 @@
     const P = window.Points;
     return `<div class="award-items">${list.map(it => `<button data-item="${esc(it.id)}"><span class="picon">${esc(it.icon)}</span><span>${esc(P.itemName(it, t))}</span><b class="${it.points < 0 ? 'neg' : 'pos'}">${it.points > 0 ? '+' : ''}${it.points}</b></button>`).join('')}</div>`;
   }
-  function openPopover(target, x, y) {
-    const st = Store.state;
-    const P = window.Points;
-    let head, body;
+  // The pop-up has two choices: 加分 (points) and 作业 (homework still open); each opens its own list.
+  let popMode = null; // null = the two choices, 'points' or 'hw'
+  function popInfo(target) {
+    const st = Store.state, P = window.Points, N = window.Notices;
     if (target.group) {
       const g = st.groups.find(v => v.id === target.group);
-      if (!g) return;
+      if (!g) return null;
       const members = P.groupMembers(st, g.id);
-      const list = st.pointItems.filter(it => it.group);
-      head = `<b>${esc(t('groupPointsFor', { name: Layout.groupName(g, st), n: members.length }))}</b>`;
-      body = !members.length ? `<p class="hint">${t('groupEmpty')}</p>` : list.length ? itemButtons(list) : `<p class="hint">${t('noGroupItems')}</p>`;
-    } else {
-      const s = st.students.find(v => v.id === target.student);
-      if (!s) return;
-      const list = st.pointItems.filter(it => !it.group);
-      head = `<b>${esc(t('pointsFor', { name: s.name }))}</b><span class="muted">${esc(t('totalPoints', { n: P.total(st, s.id) }))}</span>`;
-      body = list.length ? itemButtons(list) : `<p class="hint">${t(st.pointItems.length ? 'noStudentItems' : 'noItems')}</p>`;
+      const hws = N.openHomework(st).map(n => ({ n, ids: members.filter(id => N.isFor(st, n, id)) })).filter(x => x.ids.length);
+      return { name: Layout.groupName(g, st), members, hws, items: st.pointItems.filter(it => it.group) };
     }
-    popTarget = target;
-    pop.innerHTML = `<div class="award-head">${head}<button class="icon" data-close="1" aria-label="${esc(t('close'))}">✕</button></div>` + body;
-    pop.hidden = false;
+    const s = st.students.find(v => v.id === target.student);
+    if (!s) return null;
+    const hws = N.openHomework(st).filter(n => N.isFor(st, n, s.id)).map(n => ({ n, ids: [s.id] }));
+    return { name: s.name, student: s, hws, items: st.pointItems.filter(it => !it.group) };
+  }
+  function popBody(target, info) {
+    const st = Store.state, P = window.Points, N = window.Notices;
+    const close = `<button class="icon" data-close="1" aria-label="${esc(t('close'))}">✕</button>`;
+    const back = `<button class="icon" data-popback="1" title="${esc(t('popBack'))}" aria-label="${esc(t('popBack'))}">‹</button>`;
+    if (!popMode) {
+      const sub = info.student ? `<span class="muted">${esc(t('totalPoints', { n: P.total(st, info.student.id) }))}</span>` : `<span class="muted">${esc(t('popMembers', { n: info.members.length }))}</span>`;
+      return `<div class="award-head"><b>${esc(info.name)}</b>${sub}${close}</div>
+        <div class="award-items award-menu"><button data-popmode="points"><span class="picon">⭐</span><span>${esc(t('popPoints'))}</span><b>›</b></button>
+        <button data-popmode="hw"><span class="picon">📝</span><span>${esc(t('popHomework'))}</span><b class="muted small">${info.hws.length ? esc(t('hwOpenN', { n: info.hws.length })) : ''} ›</b></button></div>`;
+    }
+    if (popMode === 'points') {
+      let head, body;
+      if (target.group) {
+        head = `<b>${esc(t('groupPointsFor', { name: info.name, n: info.members.length }))}</b>`;
+        body = !info.members.length ? `<p class="hint">${t('groupEmpty')}</p>` : info.items.length ? itemButtons(info.items) : `<p class="hint">${t('noGroupItems')}</p>`;
+      } else {
+        head = `<b>${esc(t('pointsFor', { name: info.name }))}</b><span class="muted">${esc(t('totalPoints', { n: P.total(st, info.student.id) }))}</span>`;
+        body = info.items.length ? itemButtons(info.items) : `<p class="hint">${t(st.pointItems.length ? 'noStudentItems' : 'noItems')}</p>`;
+      }
+      return `<div class="award-head">${back}${head}${close}</div>` + body;
+    }
+    const head = `<div class="award-head">${back}<b>${esc(t('hwFor', { name: info.name }))}</b>${close}</div>`;
+    if (!info.hws.length) return head + `<p class="hint">${esc(t('hwNoneOpen'))}</p>`;
+    return head + (target.group ? `<p class="hint small">${esc(t('hwGroupTap'))}</p>` : '') + `<div class="award-items">${info.hws.map(({ n, ids }) => {
+      const k = ids.filter(id => N.handedIn(n, id)).length, all = k === ids.length;
+      const state = target.group ? `${k} / ${ids.length}` : all ? '✓ ' + t('hwHanded') : t('hwNotYet');
+      return `<button data-hw="${esc(n.id)}" class="hwbtn${all ? ' done' : ''}" aria-pressed="${all}"><span class="picon">${all ? '✅' : '📝'}</span><span>${esc(n.title || N.plainText(n.body).slice(0, 40) || t('ntHomework'))}</span><b>${esc(state)}</b></button>`;
+    }).join('')}</div>`;
+  }
+  function fillPopover() {
+    if (!popTarget) return false;
+    const info = popInfo(popTarget);
+    if (!info) { closePopover(); return false; }
+    pop.innerHTML = popBody(popTarget, info);
+    return true;
+  }
+  let popXY = [0, 0];
+  function placePopover() {
+    const [x, y] = popXY;
     const wrap = pop.parentElement.getBoundingClientRect();
     const w = pop.offsetWidth, h = pop.offsetHeight;
     pop.style.left = Math.max(8, Math.min(wrap.width - w - 8, x - wrap.left - w / 2)) + 'px';
     pop.style.top = Math.max(8, Math.min(wrap.height - h - 8, y - wrap.top + 16)) + 'px';
-    const first = pop.querySelector('[data-item]');
+    const first = pop.querySelector('[data-popmode],[data-item],[data-hw]');
     if (first) first.focus();
   }
-  function closePopover() { pop.hidden = true; popTarget = null; }
+  function openPopover(target, x, y) {
+    popTarget = target; popMode = null; popXY = [x, y];
+    if (!fillPopover()) return;
+    pop.hidden = false;
+    placePopover();
+  }
+  function markHomework(hid) {
+    const info = popTarget && popInfo(popTarget);
+    const hw = info && info.hws.find(x => x.n.id === hid);
+    if (!hw) return;
+    const N = window.Notices;
+    const on = !hw.ids.every(id => N.handedIn(hw.n, id));
+    Live.change({ type: 'hw', n: hid, s: hw.ids, on, day: N.today(), id: Store.uid('h') });
+    if (on) hw.ids.forEach(id => flyText(id, '✓'));
+    fillPopover();
+  }
+  function closePopover() { pop.hidden = true; popTarget = null; popMode = null; }
 
   function award(studentId, itemId) {
     const entry = Live.change({ type: 'add', s: studentId, i: itemId, id: Store.uid('e'), at: new Date().toISOString() });
@@ -216,13 +266,14 @@
     Live.change({ type: 'undo', id: entryId });
   }
   // a small "+1" that floats up from the desk
-  function flyScore(studentId, p) {
+  function flyScore(studentId, p) { flyText(studentId, (p > 0 ? '+' : '') + p, p < 0); }
+  function flyText(studentId, text, neg) {
     const desk = Store.state.desks.find(d => d.studentId === studentId);
     const el = desk && $(`.desk[data-desk="${desk.id}"]`);
     if (!el) return;
     const f = document.createElement('div');
-    f.className = 'fly ' + (p < 0 ? 'neg' : 'pos');
-    f.textContent = (p > 0 ? '+' : '') + p;
+    f.className = 'fly ' + (neg ? 'neg' : 'pos');
+    f.textContent = text;
     el.appendChild(f);
     setTimeout(() => f.remove(), 1200);
   }
@@ -237,6 +288,11 @@
   });
   pop.addEventListener('click', e => {
     if (e.target.closest('[data-close]')) { closePopover(); return; }
+    const m = e.target.closest('[data-popmode]');
+    if (m) { popMode = m.dataset.popmode; fillPopover(); placePopover(); return; }
+    if (e.target.closest('[data-popback]')) { popMode = null; fillPopover(); placePopover(); return; }
+    const hb = e.target.closest('[data-hw]');
+    if (hb && popTarget) { markHomework(hb.dataset.hw); return; }
     const b = e.target.closest('[data-item]');
     if (b && popTarget) {
       if (popTarget.group) awardGroup(popTarget.group, b.dataset.item);

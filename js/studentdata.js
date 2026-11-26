@@ -111,7 +111,7 @@
     out.nt = (st.notices || []).filter(n => !n.to || n.to >= now)
       .filter(n => n.aud === 'groups' ? !!myGroup && n.groups.includes(myGroup) : n.aud === 'students' ? n.students.includes(sid) : true)
       .sort((a, b) => (b.from || '').localeCompare(a.from || '') || (b.at || '').localeCompare(a.at || ''))
-      .slice(0, 30).map(n => ({ y: n.type, t: n.title, b: n.body, f: n.from, e: n.to }));
+      .slice(0, 30).map(n => { const o = { y: n.type, t: n.title, b: n.body, f: n.from, e: n.to }; if (n.type === 'hw') { o.h = n.subs && n.subs[sid] !== undefined ? 1 : 0; if (n.closed) o.x = 1; } return o; });
     return out;
   }
   // The plain snapshots (to notice when nothing changed) and the file to upload.

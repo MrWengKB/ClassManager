@@ -1,5 +1,6 @@
 /* Class Manager · 通知 / 作业：数据工具和安全的 Markdown 显示
- * state.notices: [{ id, type: 'notice' | 'hw', title, body, from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' | '', at: ISO }]
+ * state.notices: [{ id, type: 'notice' | 'hw' | 'remind', title, body, from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' | '', at: ISO }]
+ *   homework also has closed (true = no more hand-ins) and subs: { studentId: 'YYYY-MM-DD' handed in }
  * (kept in shape by Store.normalize). A post is valid from `from` to `to` (both days included);
  * an empty `to` means it never ends.
  *
@@ -102,5 +103,32 @@
   // newest first: latest start date, then latest posted
   const sorted = list => (list || []).slice().sort((a, b) => (b.from || '').localeCompare(a.from || '') || (b.at || '').localeCompare(a.at || ''));
 
-  window.Notices = { render, plainText, status, activeOn, sorted, today, ymd };
+  /* ---------- homework hand-ins ---------- */
+  // The students a post is for (whole class, students sitting in the chosen groups, or chosen students)
+  function members(st, n) {
+    if (n.aud === 'groups') {
+      const g = new Set(n.groups);
+      return st.desks.filter(d => d.studentId && d.groupId && g.has(d.groupId)).map(d => d.studentId);
+    }
+    if (n.aud === 'students') return n.students.filter(id => st.students.some(s => s.id === id));
+    return st.students.map(s => s.id);
+  }
+  const isFor = (st, n, sid) => members(st, n).includes(sid);
+  // homework still taking hand-ins, oldest first (the order of the columns in the sheet)
+  const homework = st => (st.notices || []).filter(n => n.type === 'hw').slice().sort((a, b) => (a.at || '').localeCompare(b.at || '') || a.id.localeCompare(b.id));
+  const openHomework = st => homework(st).filter(n => !n.closed);
+  const handedIn = (n, sid) => !!(n.subs && Object.prototype.hasOwnProperty.call(n.subs, sid));
+  // a change from the class view, also replayed onto a newer copy from Drive:
+  // { type: 'hw', n: homework id, s: [student ids], on: true (handed in) / false, day }
+  function apply(state, d) {
+    const n = (state.notices || []).find(x => x.id === d.n && x.type === 'hw');
+    if (!n) return null;
+    n.subs = n.subs || {};
+    const ids = (d.s || []).filter(id => state.students.some(s => s.id === id));
+    if (!ids.length) return null;
+    ids.forEach(id => { if (d.on) { if (!handedIn(n, id)) n.subs[id] = d.day || today(); } else delete n.subs[id]; });
+    return { n: n.id, on: !!d.on, s: ids };
+  }
+
+  window.Notices = { render, plainText, status, activeOn, sorted, today, ymd, members, isFor, homework, openHomework, handedIn, apply };
 })();
