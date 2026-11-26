@@ -77,6 +77,12 @@
     Store.load(record.state, false);
     renderClassSel();
     onOpen(refit);
+    // a sheet written by an older version of the site: write it again so it gets the new tabs (e.g. Homework)
+    if (record.outdated && !saving) {
+      saving = true;
+      try { const res = await Cloud.api('save', { id, state: Store.state, version: live.version }); live.version = res.version; live.updated = res.updated; } catch (e) { /* next save adds them */ }
+      saving = false;
+    }
   }
 
   async function startCloud() {

@@ -120,7 +120,7 @@
     const buf = await request('GET', `${API}/files/${encodeURIComponent(id)}/export?mimeType=${encodeURIComponent(XLSX_MIME)}`, { bytes: true });
     let state;
     try { state = await window.SheetIO.fromBytes(buf); } catch (e) { throw new CloudError('badSheet', e.message); }
-    return { record: { id, version: Number(m.version) || 0, updated: m.modifiedTime, state } };
+    return { record: { id, version: Number(m.version) || 0, updated: m.modifiedTime, state, outdated: !!state.outdated } };
   }
 
   async function create(state) {

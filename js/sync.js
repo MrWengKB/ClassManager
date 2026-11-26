@@ -38,6 +38,7 @@
     Cloud.rememberClassId(id);
     Store.load(record.state);
     loading = false; status = 'saved'; render();
+    if (record.outdated) { dirty = true; saveNow(); } // add the tabs this version of the site writes (e.g. Homework)
     if (refit) requestAnimationFrame(() => window.Layout.fit());
   }
 

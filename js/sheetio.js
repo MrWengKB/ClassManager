@@ -1,7 +1,7 @@
 /* Class Manager · 班级 ⇄ 试算表（Google Sheet / Excel）
  * One workbook per class. Tabs anyone can read, and some they can edit:
  *   Students 学生 / Items 加分项目 / Roles 职务 / Reading 阅读   → edits are read back
- *   Homework 作业 (only when there is homework): one column per homework, ✓ = handed in → read back
+ *   Homework 作业: one column per homework, ✓ = handed in → read back
  *   Points by date 每日加分 / About 说明                           → for reading only
  *   _data (hidden)  the whole class as JSON, for everything the tabs don't hold (layout, seats, logs…)
  * Reading a workbook starts from _data and then applies what the editable tabs say.
@@ -66,7 +66,7 @@
     tabs.push([TAB.reading, [['ID', 'Name (read only)', 'Rounds', 'This round (0-' + (R.RB - 1) + ')', 'Total books (read only)', 'This week (read only)']]
       .concat(st.students.map(s => { const r = R.get(st, s.id); return [s.id, s.name, r.rounds, r.progress, R.total(st, s.id), R.since(st, s.id, wk)]; })), [12, 18, 10, 14, 14, 14]]);
     const N = window.Notices, hws = N ? N.homework(st) : [];
-    if (hws.length) {
+    {
       const who = hws.map(n => new Set(N.members(st, n)));
       const rows = [['ID', 'Name (read only)'].concat(hws.map(n => (n.title || N.plainText(n.body).slice(0, 40) || 'Homework') + (n.closed ? CLOSED : ''))),
         ['Homework ID (do not edit)', ''].concat(hws.map(n => n.id))];
@@ -161,6 +161,8 @@
     }
     const hwTab = tabOf(wb, TAB.homework);
     if (hwTab && Array.isArray(st.notices)) readHomework(XLSX.utils.sheet_to_json(hwTab, { header: 1, raw: true, defval: '' }), st);
+    // written by an older version of the site (no Homework tab yet): the caller saves it again once
+    if (!hwTab) Object.defineProperty(st, 'outdated', { value: true });
     return st;
   }
 
