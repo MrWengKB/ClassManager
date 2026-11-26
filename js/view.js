@@ -182,12 +182,12 @@
       if (!g) return null;
       const members = P.groupMembers(st, g.id);
       const hws = N.openHomework(st).map(n => ({ n, ids: members.filter(id => N.isFor(st, n, id)) })).filter(x => x.ids.length);
-      return { name: Layout.groupName(g, st), members, hws, items: st.pointItems.filter(it => it.group) };
+      return { name: Layout.groupName(g, st), members, hws, items: st.pointItems.filter(it => it.group && it.id !== P.ONTIME) };
     }
     const s = st.students.find(v => v.id === target.student);
     if (!s) return null;
     const hws = N.openHomework(st).filter(n => N.isFor(st, n, s.id)).map(n => ({ n, ids: [s.id] }));
-    return { name: s.name, student: s, hws, items: st.pointItems.filter(it => !it.group) };
+    return { name: s.name, student: s, hws, items: st.pointItems.filter(it => !it.group && it.id !== P.ONTIME) };
   }
   function popBody(target, info) {
     const st = Store.state, P = window.Points, N = window.Notices;
@@ -247,8 +247,8 @@
     if (!hw) return;
     const N = window.Notices;
     const on = !hw.ids.every(id => N.handedIn(hw.n, id));
-    Live.change({ type: 'hw', n: hid, s: hw.ids, on, day: N.today(), id: Store.uid('h') });
-    if (on) hw.ids.forEach(id => flyText(id, '✓'));
+    const res = Live.change({ type: 'hw', n: hid, s: hw.ids, on, day: N.today(), id: Store.uid('h') });
+    if (res) hw.ids.forEach(id => { const p = res.pts && res.pts[id]; if (p) flyScore(id, p); else if (on) flyText(id, '✓'); });
     fillPopover();
   }
   function closePopover() { pop.hidden = true; popTarget = null; popMode = null; }

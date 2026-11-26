@@ -283,8 +283,9 @@
       h += `<li><button class="icon picon" data-act="cycleIcon" data-id="${it.id}" title="${esc(t('rename'))}">${esc(it.icon)}</button>
         <input class="pname" data-item="${it.id}" data-field="name" value="${esc(P.itemName(it, t))}" maxlength="40" aria-label="${esc(t('rename'))}">
         <input class="ppts" type="number" min="-100" max="100" step="1" data-item="${it.id}" data-field="points" value="${it.points}" title="${esc(t('pointsLabel'))}" aria-label="${esc(t('pointsLabel'))}">
-        <button class="ptarget${it.group ? ' grp' : ''}" data-act="toggleTarget" data-id="${it.id}" title="${esc(t('targetTip'))}">${t(it.group ? 'forGroup' : 'forStudent')}</button>
-        <button class="icon danger" data-act="delItem" data-id="${it.id}" title="${esc(t('delete'))}">✕</button></li>`;
+        ${it.id === P.ONTIME ? `<span class="ptarget plock" title="${esc(t('onTimeTip'))}">⏰ ${t('autoItem')}</span><span class="icon plock" title="${esc(t('onTimeTip'))}">🔒</span></li>`
+          : `<button class="ptarget${it.group ? ' grp' : ''}" data-act="toggleTarget" data-id="${it.id}" title="${esc(t('targetTip'))}">${t(it.group ? 'forGroup' : 'forStudent')}</button>
+        <button class="icon danger" data-act="delItem" data-id="${it.id}" title="${esc(t('delete'))}">✕</button></li>`}`;
     });
     h += `</ul><form class="addrow" data-form="addItem"><input id="newItem" placeholder="${esc(t('newItemPh'))}" autocomplete="off" maxlength="40">
       <input id="newItemPts" class="ppts" type="number" min="-100" max="100" step="1" value="1" aria-label="${esc(t('pointsLabel'))}"><button>${t('add')}</button></form></section>`;
@@ -429,7 +430,7 @@
       it.icon = list[k];
     }),
     delItem: id => {
-      const it = Store.state.pointItems.find(x => x.id === id); if (!it) return;
+      const it = Store.state.pointItems.find(x => x.id === id); if (!it || it.id === window.Points.ONTIME) return;
       if (confirm(t('confirmDeleteItem', { name: window.Points.itemName(it, t) }))) Store.commit(st => { st.pointItems = st.pointItems.filter(x => x.id !== id); });
     },
     toggleTarget: id => Store.commit(st => { const it = st.pointItems.find(x => x.id === id); if (it) it.group = !it.group; }),

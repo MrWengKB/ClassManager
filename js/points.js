@@ -9,6 +9,15 @@
 (function () {
   const ICONS = ['⭐', '🙋', '🤝', '📘', '👥', '🎨', '🏃', '🧹', '💡', '🎵', '🏆', '👏'];
   const LOG_MAX = 50;
+  // built-in item that is always there: given automatically when homework is handed in on time
+  // (see Notices.setHandIn). The teacher can change its points but not delete it.
+  const ONTIME = 'p_ontime';
+  function ensureOnTime(list) {
+    const it = list.find(x => x && x.id === ONTIME);
+    if (it) it.group = false;
+    else list.push({ id: ONTIME, key: 'ontime', name: '', icon: '⏰', points: 1, group: false });
+    return list;
+  }
 
   function defaults() {
     return [
@@ -28,6 +37,7 @@
       points: Number.isFinite(+it.points) ? Math.max(-100, Math.min(100, Math.round(+it.points))) : 1,
       group: !!it.group
     }));
+    ensureOnTime(b.pointItems);
     const iid = new Set(b.pointItems.map(it => it.id));
     b.scores = {};
     const src = s.scores && typeof s.scores === 'object' ? s.scores : {};
@@ -65,6 +75,7 @@
   }
   // add (n = 1) or take back (n = -1) one award in the totals and in that day's record
   function bump(state, sid, iid, p, at, n) {
+    state.scores = state.scores || {};
     if (n > 0) {
       const cell = ((state.scores[sid] = state.scores[sid] || {})[iid] = state.scores[sid][iid] || [0, 0]);
       cell[0] += 1; cell[1] += p;
@@ -194,5 +205,5 @@
     return out;
   }
 
-  window.Points = { dayOf, days, dayItems, studentDays, defaults, normalize, itemName, nextIcon, add, addGroup, groupMembers, undo, apply, total, totals, leaderboard, groupBoard, itemStats, ICONS };
+  window.Points = { ONTIME, ensureOnTime, bump, dayOf, days, dayItems, studentDays, defaults, normalize, itemName, nextIcon, add, addGroup, groupMembers, undo, apply, total, totals, leaderboard, groupBoard, itemStats, ICONS };
 })();

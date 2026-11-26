@@ -270,7 +270,7 @@
     hwClear: id => {
       const n = Store.state.notices.find(x => x.id === id); if (!n) return;
       if (!confirm(t('hwConfirmClear', { name: n.title || N.plainText(n.body).slice(0, 30) }))) return;
-      Store.commit(st => { const x = st.notices.find(v => v.id === id); if (x) x.subs = {}; });
+      Store.commit(st => { const x = st.notices.find(v => v.id === id); if (x) Object.keys(x.subs || {}).forEach(sid => N.setHandIn(st, x, sid, false)); });
     },
     hwClose: id => Store.commit(st => { const x = st.notices.find(v => v.id === id); if (x) x.closed = !x.closed; }),
     ntPickAll: () => { const q = d.pickQ.toLowerCase(); Store.state.students.forEach(s => { if ((!q || s.name.toLowerCase().includes(q)) && !d.students.includes(s.id)) d.students.push(s.id); }); rerender(); },

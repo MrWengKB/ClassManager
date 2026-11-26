@@ -648,3 +648,5 @@ ul.hwlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .award-items .hwbtn b { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
 .award-items .hwbtn.done { background: #e6f4ea; border-color: #9fd3ae; }
 .award-items .hwbtn.done b { color: #1e7b3a; }
+.ptarget.plock { flex: none; padding: 4px 8px; font-size: 12px; border-radius: 999px; background: #f1ecfb; color: #5b3fa8; white-space: nowrap; }
+.icon.plock { flex: none; min-width: 30px; text-align: center; opacity: .6; cursor: help; }

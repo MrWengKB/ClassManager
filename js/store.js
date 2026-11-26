@@ -68,6 +68,10 @@
           out.subs = {};
           const subs = n.subs && typeof n.subs === 'object' ? n.subs : {};
           Object.keys(subs).forEach(id => { if (sid.has(id)) out.subs[id] = typeof subs[id] === 'string' && DAY.test(subs[id]) ? subs[id] : ''; });
+          // on-time points already given: { studentId: ['YYYY-MM-DD', points] } (see Notices.setHandIn)
+          out.awarded = {};
+          const aw = n.awarded && typeof n.awarded === 'object' ? n.awarded : {};
+          Object.keys(aw).forEach(id => { const v = aw[id]; if (sid.has(id) && Array.isArray(v) && DAY.test(v[0]) && Number.isFinite(+v[1])) out.awarded[id] = [v[0], +v[1]]; });
         }
         return out;
       });

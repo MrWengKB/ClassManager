@@ -194,7 +194,10 @@
         const v = r[j], s = str(v);
         if (s === '—') return; // not for this student
         const done = typeof v === 'boolean' ? v : !NOT_IN.includes(s.toLowerCase());
-        if (done && !Object.prototype.hasOwnProperty.call(subs, sid)) subs[sid] = cellDay(v) || today;
+        n.subs = subs;
+        // with Notices loaded, an on-time hand-in typed in the sheet gets its points here (once)
+        if (window.Notices) window.Notices.setHandIn(st, n, sid, done, done ? cellDay(v) || today : '');
+        else if (done && !Object.prototype.hasOwnProperty.call(subs, sid)) subs[sid] = cellDay(v) || today;
         else if (!done) delete subs[sid];
       });
       n.subs = subs;

@@ -118,17 +118,48 @@
   const homework = st => (st.notices || []).filter(n => n.type === 'hw').slice().sort((a, b) => (a.at || '').localeCompare(b.at || '') || a.id.localeCompare(b.id));
   const openHomework = st => homework(st).filter(n => !n.closed);
   const handedIn = (n, sid) => !!(n.subs && Object.prototype.hasOwnProperty.call(n.subs, sid));
+  // on time = handed in on a day the homework is valid (from … to, both included; no end date = always)
+  const onTime = (n, day) => (!n.from || day >= n.from) && (!n.to || day <= n.to);
+  // Mark one hand-in (on) or take it back (off). An on-time hand-in gets the built-in item
+  // “Homework on time” once; n.awarded = { studentId: [day, points] } remembers it, so reading
+  // the sheet again never adds the points twice, and taking the hand-in back takes those points back.
+  // Returns the points given (+) or taken back (-), 0 when none.
+  function setHandIn(state, n, sid, on, day) {
+    const P = window.Points;
+    n.subs = n.subs || {};
+    n.awarded = n.awarded && typeof n.awarded === 'object' ? n.awarded : {};
+    const at = d => (d || today()) + 'T12:00:00';
+    if (on) {
+      if (handedIn(n, sid)) return 0;
+      day = day || today();
+      n.subs[sid] = day;
+      if (!P || n.awarded[sid] || !onTime(n, day)) return 0;
+      state.pointItems = P.ensureOnTime(state.pointItems || []);
+      const it = state.pointItems.find(x => x.id === P.ONTIME);
+      if (!it || !it.points) return 0;
+      P.bump(state, sid, P.ONTIME, it.points, at(day), 1);
+      n.awarded[sid] = [day, it.points];
+      return it.points;
+    }
+    if (!handedIn(n, sid)) return 0;
+    delete n.subs[sid];
+    const a = n.awarded[sid];
+    if (!P || !a) return 0;
+    P.bump(state, sid, P.ONTIME, a[1], at(a[0]), -1);
+    delete n.awarded[sid];
+    return -a[1];
+  }
   // a change from the class view, also replayed onto a newer copy from Drive:
   // { type: 'hw', n: homework id, s: [student ids], on: true (handed in) / false, day }
   function apply(state, d) {
     const n = (state.notices || []).find(x => x.id === d.n && x.type === 'hw');
     if (!n) return null;
-    n.subs = n.subs || {};
     const ids = (d.s || []).filter(id => state.students.some(s => s.id === id));
     if (!ids.length) return null;
-    ids.forEach(id => { if (d.on) { if (!handedIn(n, id)) n.subs[id] = d.day || today(); } else delete n.subs[id]; });
-    return { n: n.id, on: !!d.on, s: ids };
+    const pts = {};
+    ids.forEach(id => { pts[id] = setHandIn(state, n, id, !!d.on, d.day); });
+    return { n: n.id, on: !!d.on, s: ids, pts };
   }
 
-  window.Notices = { render, plainText, status, activeOn, sorted, today, ymd, members, isFor, homework, openHomework, handedIn, apply };
+  window.Notices = { render, plainText, status, activeOn, sorted, today, ymd, members, isFor, homework, openHomework, handedIn, onTime, setHandIn, apply };
 })();
