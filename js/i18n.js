@@ -273,6 +273,7 @@
     tReset: ['Reset', '重置', 'Set semula', 'மீட்டமை'],
     support: ['Support', '支持作者', 'Sokong', 'ஆதரவு'],
     supportTip: ['Watch a short ad to support the developer', '看一段短广告，支持作者', 'Tonton iklan pendek untuk menyokong pembangun', 'உருவாக்குநரை ஆதரிக்க ஒரு சிறிய விளம்பரத்தைப் பாருங்கள்'],
+    feedback: ['Suggest a feature', '功能建议', 'Cadangkan ciri baharu', 'அம்சத்தைப் பரிந்துரைக்க'],
     readTitle: ['Reading log', '阅读打卡', 'Rekod bacaan', 'வாசிப்புப் பதிவு'],
     readHint: ['Tap a book to log it. {n} books = 1 round 🏅. Reading is tracked separately and does not count towards points.', '点击书本打卡，满 {n} 本 = 1 轮 🏅。阅读记录独立统计，不计入积分。', 'Tekan buku untuk merekod. {n} buku = 1 pusingan 🏅. Rekod bacaan dikira berasingan dan tidak termasuk dalam mata.', 'பதிவு செய்ய புத்தகத்தை அழுத்துங்கள். {n} புத்தகங்கள் = 1 சுற்று 🏅. வாசிப்பு தனியாகக் கணக்கிடப்படும், புள்ளிகளில் சேராது.'],
     roundUnit: ['rounds', '轮', 'pusingan', 'சுற்றுகள்'],

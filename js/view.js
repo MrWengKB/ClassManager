@@ -20,6 +20,7 @@
     $('#btnPrint span').textContent = t('print');
     $('#lnkAdmin span').textContent = t('adminLink');
     $('#lnkReading span').textContent = t('readTitle');
+    if ($('#lnkFeedback')) $('#lnkFeedback').textContent = t('feedback');
     $('#lnkSupport span').textContent = t('support');
     $('#lnkSupport').title = t('supportTip');
     $('#zoomOut').title = t('zoomOut'); $('#zoomIn').title = t('zoomIn'); $('#zoomFit').textContent = t('zoomFit');
